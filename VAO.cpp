@@ -4,7 +4,18 @@
 // Constructor that generates a VAO ID
 VAO::VAO()
 {
-	glGenVertexArrays(1, &ID);
+	glCreateVertexArrays(1, &ID);
+}
+
+void VAO::EnableAttrib()
+{
+	glEnableVertexArrayAttrib(ID, 0);
+	glVertexArrayAttribBinding(ID, 0, 0);
+	glVertexArrayAttribFormat(ID, 0, 3, GL_FLOAT, GL_FALSE, 0);
+
+	glEnableVertexArrayAttrib(ID, 1);
+	glVertexArrayAttribBinding(ID, 1, 0);
+	glVertexArrayAttribFormat(ID, 1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat));
 }
 
 // Links a VBO Attribute such as a position or color to the VAO
