@@ -11,12 +11,12 @@
 
 bool vSync = true;
 
-int numAgents = 32;
+int numAgents = 1024;
 struct Agent
 {
 	float pos[2];
 	float angle;
-	float pad;
+	float velocity;
 };
 
 // Vertices coordinates (first 3) and texture coordinates (last 2)
@@ -154,6 +154,7 @@ int main()
 		agentsVector[i].pos[0] = 50 * std::cos(i * 2 * 3.14159 / numAgents) + 256;  // Start at (0, 0)
 		agentsVector[i].pos[1] = 50 * std::sin(i * 2 * 3.14159 / numAgents) + 256;  // Start at (0, 0)
 		agentsVector[i].angle = i * 2 * 3.14159 / numAgents;
+		agentsVector[i].velocity = 1.0f;
 	}
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
@@ -161,6 +162,7 @@ int main()
 	int framebufferWidth, framebufferHeight;
 	// Restart the GLFW timer and start main while loop 
 	glfwSetTime(0.0);
+	std::cout << numAgents / 128.0f << "  " << ceil(numAgents / 128.0f) << std::endl;
 	while (!glfwWindowShouldClose(window))
 	{
 		// Specify the color of the background
@@ -171,7 +173,7 @@ int main()
 		shaderProgram.ActivateCompute();
 		glUniform1f(timeUniformComputeID, iTime);
 		glUniform1i(numAgentsUniformID, numAgents);
-		glDispatchCompute(1, 1, 1);
+		glDispatchCompute(ceil(numAgents / 128.0f), 1, 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 		// Tell OpenGL which Shader Program we want to use

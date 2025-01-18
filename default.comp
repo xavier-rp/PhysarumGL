@@ -5,9 +5,10 @@ uniform int numAgents;
 
 struct Agent
 {
+	// Not quite sure yet, but The struct has to be a multiple of 8 bytes. Otherwise strange results occur.
 	vec2 pos;
 	float angle;
-	float pad; // Not quite sure yet, but The struct has to be a multiple of 8 bytes 
+	float velocity; 
 };	
 
 layout (std430, binding = 1) buffer agentsBuffer{Agent agents[];};
@@ -20,24 +21,38 @@ layout(rgba32f, binding = 0) uniform image2D screen;
 void main()
 {
 	uint agentIndex = gl_GlobalInvocationID.x;
+	ivec2 dims = imageSize(screen);
 
     if (agentIndex >= uint(numAgents)) {
 		// Shows the invocations that haven't done work on an agent
 		vec4 pixel = vec4(1.0, 0.0, 1.0, 1.0);
-		ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.x * 2, 500);
+		ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.x, 500);
 		imageStore(screen, pixel_coords, pixel);
     }
 	else{
 		// Shows the invocations that have done work on an agent
 		vec4 pixel = vec4(1.0, 1.0, 0.0, 1.0);
-		ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.x * 2, 500);
+		ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), 500 - 2 * (gl_GlobalInvocationID.x / dims.x));
 		imageStore(screen, pixel_coords, pixel);
 
 		pixel = vec4(1.0, 0.0, 0.0, 1.0);
 		Agent agent;
 		agent = agents[agentIndex];
-		agent.pos[0] += cos(agent.angle);
-		agent.pos[1] += sin(agent.angle);
+		agent.pos[0] += agent.velocity * cos(agent.angle);
+		agent.pos[1] += agent.velocity * sin(agent.angle);
+		if (agent.pos[0] > dims.x) {
+			agent.pos[0] -= float(dims.x);
+		}
+		else if (agent.pos[0] < 0){
+			agent.pos[0] += float(dims.x);
+		}
+		if (agent.pos[1] > dims.y) {
+			agent.pos[1] -= float(dims.y);
+		}
+		else if (agent.pos[1] < 0){
+			agent.pos[1] += float(dims.y);
+		}
+		
 		pixel_coords = ivec2(int(agent.pos[0]), int(agent.pos[1]));
 		imageStore(screen, pixel_coords, pixel);
 
