@@ -26,18 +26,22 @@ void main()
     if (trail > 0.0f){
         trailMap[trailMapIndex] = max(0.0f, trail-0.05);
     }
-    color = vec4(trail, 0.0f, 0.0f, 1.0f);
 
+    float sum = 0;
+	float originalCol = trailMap[trailMapIndex];
+	// 3x3 blur
+	for (int offsetX = -1; offsetX <= 1; offsetX ++) {
+		for (int offsetY = -1; offsetY <= 1; offsetY ++) {
+			int sampleX = pixelCoords.x + offsetX;
+			int sampleY = pixelCoords.y + offsetY;
+			sum += trailMap[getIndex(sampleX,sampleY)];
+		}
+	}
 
-    //if (color.r > 0){
-    //    color.r = max(0, color.r-0.01);
-    //}
-    //if (color.g > 0){
-    //    color.g = max(0, color.g-0.01);
-    //}
-    //if (color.b > 0){
-    //    color.b = max(0, color.b-0.01);
-    //}
+	float blurredCol = sum / 9.0f;
+
+    color = vec4(blurredCol, 0.0f, 0.0f, 1.0f);
+
 
     imageStore(screen, pixelCoords, color);
 
