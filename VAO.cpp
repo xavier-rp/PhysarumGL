@@ -13,6 +13,7 @@ void VAO::EnableAttrib()
 	glVertexArrayAttribBinding(ID, 0, 0);
 	glVertexArrayAttribFormat(ID, 0, 3, GL_FLOAT, GL_FALSE, 0);
 
+	//This attribute is actually the texture coordinates
 	glEnableVertexArrayAttrib(ID, 1);
 	glVertexArrayAttribBinding(ID, 1, 0);
 	glVertexArrayAttribFormat(ID, 1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat));

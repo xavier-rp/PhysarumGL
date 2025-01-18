@@ -10,7 +10,7 @@
 
 bool vSync = true;
 
-// Vertices coordinates
+// Vertices coordinates (first 3) and texture coordinates (last 2)
 GLfloat vertices[] =
 {
 	-1.0f, -1.0f , 0.0f, 0.0f, 0.0f,
@@ -138,7 +138,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		shaderProgram.ActivateCompute();
-		glDispatchCompute(ceil(SCREEN_WIDTH / 8), ceil(SCREEN_HEIGHT / 4), 1);
+		glDispatchCompute(ceil(SCREEN_WIDTH / 8), ceil(SCREEN_HEIGHT / 8), 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 		// Tell OpenGL which Shader Program we want to use
