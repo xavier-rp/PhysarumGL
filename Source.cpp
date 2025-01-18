@@ -11,7 +11,7 @@
 
 bool vSync = true;
 
-int numAgents = 1024;
+int numAgents = 4194304;
 struct Agent
 {
 	float pos[2];
@@ -45,8 +45,8 @@ int main()
 	// Initialize GLFW
 	glfwInit();
 
-	const unsigned int SCREEN_WIDTH = 512;
-	const unsigned int SCREEN_HEIGHT = 512;
+	const unsigned int SCREEN_WIDTH = 1024;
+	const unsigned int SCREEN_HEIGHT = 1024;
 
 	// Tell GLFW what version of OpenGL we are using 
 	// In this case we are using OpenGL 3.3
@@ -151,9 +151,9 @@ int main()
 	std::vector<Agent> agentsVector(numAgents);
 
 	for (int i = 0; i < numAgents; ++i) {
-		agentsVector[i].pos[0] = 50 * std::cos(i * 2 * 3.14159 / numAgents) + 256;  // Start at (0, 0)
-		agentsVector[i].pos[1] = 50 * std::sin(i * 2 * 3.14159 / numAgents) + 256;  // Start at (0, 0)
-		agentsVector[i].angle = i * 2 * 3.14159 / numAgents;
+		agentsVector[i].pos[0] = 50 * std::cos(static_cast<float>(i) * 2.0f * 3.14159f / numAgents) + static_cast<float>(SCREEN_WIDTH / 2);  // Start at (0, 0)
+		agentsVector[i].pos[1] = 50 * std::sin(static_cast<float>(i) * 2.0f * 3.14159f / numAgents) + static_cast<float>(SCREEN_HEIGHT / 2);  // Start at (0, 0)
+		agentsVector[i].angle = static_cast<float>(i) * 2.0f * 3.14159f / numAgents;
 		agentsVector[i].velocity = 1.0f;
 	}
 

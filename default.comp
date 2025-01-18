@@ -38,14 +38,14 @@ void main()
     if (agentIndex >= uint(numAgents)) {
 		// Shows the invocations that haven't done work on an agent
 		vec4 pixel = vec4(1.0, 0.0, 1.0, 1.0);
-		ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.x, 500);
+		ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
 		imageStore(screen, pixel_coords, pixel);
     }
 	else{
 		// Shows the invocations that have done work on an agent
 		vec4 pixel = vec4(1.0, 1.0, 0.0, 1.0);
-		ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), 500 - 2 * (gl_GlobalInvocationID.x / dims.x));
-		imageStore(screen, pixel_coords, pixel);
+		ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
+		//imageStore(screen, pixel_coords, pixel);
 
 		pixel = vec4(1.0, 0.0, 0.0, 1.0);
 		Agent agent;
