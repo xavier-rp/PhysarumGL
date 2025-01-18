@@ -125,6 +125,8 @@ int main()
 
 	// Gets ID of uniform called "iTime" and "iResolution"
 	GLuint timeUniformID = glGetUniformLocation(shaderProgram.ID, "iTime");
+	GLuint timeUniformComputeID = glGetUniformLocation(shaderProgram.computeID, "iTime");
+	float iTime;
 	GLuint resolutionUniformID = glGetUniformLocation(shaderProgram.ID, "iResolution");
 
 	int framebufferWidth, framebufferHeight;
@@ -136,8 +138,9 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		iTime = float(glfwGetTime());
 		shaderProgram.ActivateCompute();
+		glUniform1f(timeUniformComputeID, iTime);
 		glDispatchCompute(ceil(SCREEN_WIDTH / 8), ceil(SCREEN_HEIGHT / 8), 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
@@ -148,7 +151,7 @@ int main()
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
 		// Assigns a value to the iTime and iResolution uniforms; NOTE: Must always be done after activating the Shader Program
-		glUniform1f(timeUniformID, float(glfwGetTime()));
+		glUniform1f(timeUniformID, iTime);
 		glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
 		glUniform2f(resolutionUniformID, GLfloat(framebufferWidth), GLfloat(framebufferHeight));
 

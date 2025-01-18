@@ -1,5 +1,7 @@
 #version 460 core
 
+uniform float iTime;
+
 // total size (x*y*z) should be a multiple of 32 (Nvidia) or 64 (AMD)
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -26,10 +28,13 @@ void main()
 	if (pixel_coords.x < 0 || pixel_coords.x >= dims.x || pixel_coords.y < 0 || pixel_coords.y >= dims.y ) { return; }
 
 	int pixelIndex = pixel_coords.y * dims.x + pixel_coords.x;
-	uint pseudoRandomNumber = hash(pixelIndex);
-	pixel.x = pseudoRandomNumber / 4294967295.0;
-	pixel.y = pseudoRandomNumber / 4294967295.0;
-	pixel.z = pseudoRandomNumber / 4294967295.0;
+	uint pseudoRandomNumber = hash(pixelIndex * uint(iTime*1000));
+
+	float randomValue = float(pseudoRandomNumber) / 4294967295.0;
+
+	pixel.x = randomValue;
+	pixel.y = randomValue;
+	pixel.z = randomValue;
 	
 	imageStore(screen, pixel_coords, pixel);
 }
