@@ -17,13 +17,16 @@ public:
 	// Reference ID of the Shader Program
 	GLuint ID;
 	GLuint computeID;
+	GLuint computeID2;
 	// Constructor that build the Shader Program from 2 different shaders
-	Shader(const char* vertexFile, const char* fragmentFile, const char* computeFile);
+	Shader(const char* vertexFile, const char* fragmentFile, const char* computeFile, const char* computeFile2);
 
 	// Activates the Shader Program
 	void Activate();
 	// Activates the Compute Shader Program
 	void ActivateCompute();
+	// Activates the Compute Shader Program
+	void ActivateCompute2();
 	// Deletes both Shader Programs
 	void Delete();
 private:

@@ -107,7 +107,7 @@ int main()
 	glBindImageTexture(0, screenTex, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgram("default.vert", "default.frag", "default.comp");
+	Shader shaderProgram("default.vert", "default.frag", "default.comp", "comp2.comp");
 
 	int work_grp_cnt[3];
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_grp_cnt[0]);
@@ -174,6 +174,12 @@ int main()
 		glUniform1f(timeUniformComputeID, iTime);
 		glUniform1i(numAgentsUniformID, numAgents);
 		glDispatchCompute(ceil(numAgents / 128.0f), 1, 1);
+		glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+		shaderProgram.ActivateCompute2();
+		//glUniform1f(timeUniformComputeID, iTime);
+		//glUniform1i(numAgentsUniformID, numAgents);
+		glDispatchCompute(ceil(SCREEN_WIDTH / 8), ceil(SCREEN_HEIGHT / 8), 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 		// Tell OpenGL which Shader Program we want to use

@@ -47,6 +47,9 @@
     <None Include="default.comp">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="comp2.comp">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaderClass.h">

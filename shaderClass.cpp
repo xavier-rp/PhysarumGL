@@ -19,17 +19,19 @@ std::string get_file_contents(const char* filename)
 }
 
 // Constructor that build the Shader Program from 2 different shaders
-Shader::Shader(const char* vertexFile, const char* fragmentFile, const char* computeFile)
+Shader::Shader(const char* vertexFile, const char* fragmentFile, const char* computeFile, const char* computeFile2)
 {
 	// Read vertexFile and fragmentFile and store the strings
 	std::string vertexCode = get_file_contents(vertexFile);
 	std::string fragmentCode = get_file_contents(fragmentFile);
 	std::string computeCode = get_file_contents(computeFile);
+	std::string computeCode2 = get_file_contents(computeFile2);
 
 	// Convert the shader source strings into character arrays
 	const char* vertexSource = vertexCode.c_str();
 	const char* fragmentSource = fragmentCode.c_str();
 	const char* computeSource = computeCode.c_str();
+	const char* computeSource2 = computeCode2.c_str();
 
 	// Create Vertex Shader Object and get its reference
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -73,10 +75,25 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile, const char* com
 	glLinkProgram(computeID);
 	compileErrors(computeID, "PROGRAM");
 
+	// Create Compute Shader Object and get its reference
+	GLuint computeShader2 = glCreateShader(GL_COMPUTE_SHADER);
+	// Attach Compute Shader source to the Compute Shader Object
+	glShaderSource(computeShader2, 1, &computeSource2, NULL);
+	// Compile the Compute Shader into machine code
+	glCompileShader(computeShader2);
+	// Checks if Shader compiled succesfully
+	compileErrors(computeShader2, "COMPUTE");
+
+	computeID2 = glCreateProgram();
+	glAttachShader(computeID2, computeShader2);
+	glLinkProgram(computeID2);
+	compileErrors(computeID2, "PROGRAM");
+
 	// Delete the now useless Vertex and Fragment Shader objects
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 	glDeleteShader(computeShader);
+	glDeleteShader(computeShader2);
 
 }
 
@@ -90,6 +107,12 @@ void Shader::Activate()
 void Shader::ActivateCompute()
 {
 	glUseProgram(computeID);
+}
+
+// Activates the Compute Shader Program
+void Shader::ActivateCompute2()
+{
+	glUseProgram(computeID2);
 }
 
 
