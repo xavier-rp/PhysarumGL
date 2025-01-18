@@ -14,7 +14,13 @@ void main()
     vec4 color = imageLoad(screen, pixelCoords);
 
     if (color.r > 0){
-        color.r = max(0, color.x-0.01);
+        color.r = max(0, color.r-0.01);
+    }
+    if (color.g > 0){
+        color.g = max(0, color.g-0.01);
+    }
+    if (color.b > 0){
+        color.b = max(0, color.b-0.01);
     }
 
     imageStore(screen, pixelCoords, color);

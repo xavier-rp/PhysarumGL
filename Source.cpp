@@ -11,6 +11,8 @@
 
 bool vSync = true;
 
+float PI = 3.141592653589793;
+
 int numAgents = 4194304;
 
 struct Agent
@@ -21,7 +23,10 @@ struct Agent
 };
 
 struct AgentSettings {
-	float color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+	float color[4] = {1.0f, 0.0f, 1.0f, 1.0f};
+	float sensor_angle_offset{22.5f * PI / 180.f};
+	int sensor_offset_distance{9};
+	int sensor_width{1};
 };
 
 // Vertices coordinates (first 3) and texture coordinates (last 2)
@@ -156,9 +161,9 @@ int main()
 	std::vector<Agent> agentsVector(numAgents);
 
 	for (int i = 0; i < numAgents; ++i) {
-		agentsVector[i].pos[0] = 50 * std::cos(static_cast<float>(i) * 2.0f * 3.14159f / numAgents) + static_cast<float>(SCREEN_WIDTH / 2);  // Start at (0, 0)
-		agentsVector[i].pos[1] = 50 * std::sin(static_cast<float>(i) * 2.0f * 3.14159f / numAgents) + static_cast<float>(SCREEN_HEIGHT / 2);  // Start at (0, 0)
-		agentsVector[i].angle = static_cast<float>(i) * 2.0f * 3.14159f / numAgents;
+		agentsVector[i].pos[0] = 50 * std::cos(static_cast<float>(i) * 2.0f * PI / numAgents) + static_cast<float>(SCREEN_WIDTH / 2);  // Start at (0, 0)
+		agentsVector[i].pos[1] = 50 * std::sin(static_cast<float>(i) * 2.0f * PI / numAgents) + static_cast<float>(SCREEN_HEIGHT / 2);  // Start at (0, 0)
+		agentsVector[i].angle = static_cast<float>(i) * 2.0f * PI / numAgents;
 		agentsVector[i].velocity = 1.0f;
 	}
 
