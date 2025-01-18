@@ -12,11 +12,16 @@
 bool vSync = true;
 
 int numAgents = 4194304;
+
 struct Agent
 {
 	float pos[2];
 	float angle;
 	float velocity;
+};
+
+struct AgentSettings {
+	float color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
 };
 
 // Vertices coordinates (first 3) and texture coordinates (last 2)
@@ -158,6 +163,16 @@ int main()
 	}
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
+
+	GLuint agentSettingsBuffer;
+	glGenBuffers(1, &agentSettingsBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, agentSettingsBuffer);
+	AgentSettings as;
+	// Allocate memory for the agents (sizeof(Agent))
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(AgentSettings), &as, GL_STATIC_DRAW);
+
+	// Bind the buffer to binding point 2
+	glBindBufferBase(GL_UNIFORM_BUFFER, 2, agentSettingsBuffer);
 
 	int framebufferWidth, framebufferHeight;
 	// Restart the GLFW timer and start main while loop 
