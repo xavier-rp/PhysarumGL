@@ -15,9 +15,9 @@ layout (std430, binding = 1) buffer agentsBuffer{Agent agents[];};
 
 struct AgentSettings {
 	vec4 color;
-	float sensor_angle_offset;
-	int sensor_offset_distance;
-	int sensor_width;
+	float sensorAngleOffset;
+	int sensorOffsetDistance;
+	int sensorWidth;
 };
 
 layout (std140, binding = 2) uniform agentSettingsBuffer{AgentSettings settings;};
@@ -26,6 +26,10 @@ layout (std140, binding = 2) uniform agentSettingsBuffer{AgentSettings settings;
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 
 layout(rgba32f, binding = 0) uniform image2D screen;
+
+layout(std430, binding = 3) buffer TrailMapBuffer {
+    float trailMap[];  // This is a 1D array representing the 2D matrix
+};
 
 // Hash function www.cs.ubc.ca/~rbridson/docs/schechter-sca08-turbulence.pdf
 uint hash(uint state)
@@ -39,6 +43,85 @@ uint hash(uint state)
     return state;
 }
 
+uint getIndex(int x, int y) {
+    return y * imageSize(screen).x + x;
+}
+
+float sense(Agent agent, float angle){
+	float sensorAngle = agent.angle + angle;
+	vec2 sensorDir = vec2(cos(sensorAngle), sin(sensorAngle));
+
+	vec2 sensorPos = agent.pos + sensorDir * settings.sensorOffsetDistance;
+	int sensorCentreX = int(sensorPos.x);
+	int sensorCentreY = int(sensorPos.y);
+
+	float sum = 0;
+
+	for (int offsetX = -settings.sensorWidth; offsetX <= settings.sensorWidth; offsetX ++) {
+		for (int offsetY = -settings.sensorWidth; offsetY <= settings.sensorWidth; offsetY ++) {
+			int sampleX = sensorCentreX + offsetX;
+			int sampleY = sensorCentreY + offsetY;
+			uint trailMapIndex = getIndex(sampleX, sampleY);
+			sum += trailMap[trailMapIndex];
+		}
+	}
+
+	return sum;
+	
+}
+
+void updateAgent(uint agentIndex){
+	ivec2 dims = imageSize(screen);
+	Agent agent = agents[agentIndex];
+
+	// Steer based on sensory data
+	float weightForward = sense(agent, 0);
+	float weightLeft = sense(agent, settings.sensorAngleOffset);
+	float weightRight = sense(agent, -settings.sensorAngleOffset);
+
+	// Continue in same direction
+	if (weightForward > weightLeft && weightForward > weightRight) {
+		agent.angle += 0.0f;
+	}
+	// Turn right
+	else if (weightRight > weightLeft) {
+		agent.angle -= (settings.sensorAngleOffset * 0.2f);
+	}
+	// Turn left
+	else if (weightLeft > weightRight) {
+		agent.angle += (settings.sensorAngleOffset * 0.2f);
+	}
+	else{
+		agent.angle += 0.0f;
+	}
+
+	agent.pos[0] += agent.velocity * cos(agent.angle);
+	agent.pos[1] += agent.velocity * sin(agent.angle);
+
+	if (agent.pos[0] > dims.x) {
+		agent.pos[0] -= float(dims.x);
+	}
+	else if (agent.pos[0] < 0){
+		agent.pos[0] += float(dims.x);
+	}
+
+	if (agent.pos[1] > dims.y) {
+		agent.pos[1] -= float(dims.y);
+	}
+	else if (agent.pos[1] < 0){
+		agent.pos[1] += float(dims.y);
+	}	
+
+	//vec4 color = settings.color;
+	//ivec2 pixel_coords = ivec2(int(agent.pos[0]), int(agent.pos[1]));
+	//imageStore(screen, pixel_coords, color);
+
+	uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));
+	trailMap[trailMapIndex] = 1.0f;
+	agents[agentIndex] = agent;
+
+}
+
 void main()
 {
 	uint agentIndex = gl_GlobalInvocationID.x;
@@ -46,37 +129,17 @@ void main()
 
     if (agentIndex >= uint(numAgents)) {
 		// Shows the invocations that haven't done work on an agent
-		vec4 color = vec4(1.0, 0.0, 1.0, 1.0);
-		ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
-		imageStore(screen, pixel_coords, color);
+		//vec4 color = vec4(1.0, 0.0, 1.0, 1.0);
+		//ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
+		//imageStore(screen, pixel_coords, color);
     }
 	else{
 		// Shows the invocations that have done work on an agent
-		vec4 color = vec4(1.0, 1.0, 0.0, 1.0);
-		ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
+		//vec4 color = vec4(1.0, 1.0, 0.0, 1.0);
+		//ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
 		//imageStore(screen, pixel_coords, color);
 
-		color = settings.color;
-		Agent agent;
-		agent = agents[agentIndex];
-		agent.pos[0] += agent.velocity * cos(agent.angle + settings.sensor_angle_offset);
-		agent.pos[1] += agent.velocity * sin(agent.angle);
-		if (agent.pos[0] > dims.x) {
-			agent.pos[0] -= float(dims.x);
-		}
-		else if (agent.pos[0] < 0){
-			agent.pos[0] += float(dims.x);
-		}
-		if (agent.pos[1] > dims.y) {
-			agent.pos[1] -= float(dims.y);
-		}
-		else if (agent.pos[1] < 0){
-			agent.pos[1] += float(dims.y);
-		}
-		
-		pixel_coords = ivec2(int(agent.pos[0]), int(agent.pos[1]));
-		imageStore(screen, pixel_coords, color);
-
-		agents[agentIndex] = agent;
+		updateAgent(agentIndex);
+	
 	}
 }

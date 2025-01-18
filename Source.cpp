@@ -24,9 +24,9 @@ struct Agent
 
 struct AgentSettings {
 	float color[4] = {1.0f, 0.0f, 1.0f, 1.0f};
-	float sensor_angle_offset{22.5f * PI / 180.f};
-	int sensor_offset_distance{9};
-	int sensor_width{1};
+	float sensorAngleOffset{22.5f * PI / 180.f};
+	int sensorOffsetDistance{9};
+	int sensorWidth{1};
 };
 
 // Vertices coordinates (first 3) and texture coordinates (last 2)
@@ -55,8 +55,8 @@ int main()
 	// Initialize GLFW
 	glfwInit();
 
-	const unsigned int SCREEN_WIDTH = 1024;
-	const unsigned int SCREEN_HEIGHT = 1024;
+	const unsigned int SCREEN_WIDTH = 512;
+	const unsigned int SCREEN_HEIGHT = 512;
 
 	// Tell GLFW what version of OpenGL we are using 
 	// In this case we are using OpenGL 3.3
@@ -168,6 +168,17 @@ int main()
 	}
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
+
+
+	GLuint trailMapBuffer;
+	glGenBuffers(1, &trailMapBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, trailMapBuffer);
+	std::vector<float> trailMap(SCREEN_WIDTH* SCREEN_HEIGHT, 0.0f);
+	// Allocate memory for the agents (numAgents * sizeof(Agent))
+	glBufferData(GL_SHADER_STORAGE_BUFFER, trailMap.size() * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+	// Bind the buffer to binding point 3
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, trailMapBuffer);
+
 
 	GLuint agentSettingsBuffer;
 	glGenBuffers(1, &agentSettingsBuffer);

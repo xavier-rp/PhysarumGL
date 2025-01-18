@@ -5,23 +5,39 @@ layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(rgba32f, binding = 0) uniform image2D screen;
 
+layout(std430, binding = 3) buffer TrailMapBuffer {
+    float trailMap[];  // This is a 1D array representing the 2D matrix
+};
+
+uint getIndex(int x, int y) {
+    return y * imageSize(screen).x + x;
+}
+
 void main()
 {
     
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);	
 	ivec2 dims = imageSize(screen);
 
+    uint trailMapIndex = getIndex(pixelCoords.x, pixelCoords.y);
     vec4 color = imageLoad(screen, pixelCoords);
 
-    if (color.r > 0){
-        color.r = max(0, color.r-0.01);
+    float trail = trailMap[trailMapIndex];
+    if (trail > 0.0f){
+        trailMap[trailMapIndex] = max(0.0f, trail-0.05);
     }
-    if (color.g > 0){
-        color.g = max(0, color.g-0.01);
-    }
-    if (color.b > 0){
-        color.b = max(0, color.b-0.01);
-    }
+    color = vec4(trail, 0.0f, 0.0f, 1.0f);
+
+
+    //if (color.r > 0){
+    //    color.r = max(0, color.r-0.01);
+    //}
+    //if (color.g > 0){
+    //    color.g = max(0, color.g-0.01);
+    //}
+    //if (color.b > 0){
+    //    color.b = max(0, color.b-0.01);
+    //}
 
     imageStore(screen, pixelCoords, color);
 
