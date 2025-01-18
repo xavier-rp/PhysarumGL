@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <chrono>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -9,6 +10,14 @@
 #include "EBO.h"
 
 bool vSync = true;
+
+int numAgents = 32;
+struct Agent
+{
+	float pos[2];
+	float angle;
+	float pad;
+};
 
 // Vertices coordinates (first 3) and texture coordinates (last 2)
 GLfloat vertices[] =
@@ -22,8 +31,8 @@ GLfloat vertices[] =
 // Indices for vertices order
 GLuint indices[] =
 {
-	0, 2, 1,
-	0, 3, 2
+	0, 3, 1,
+	1, 2, 3
 };
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -36,8 +45,8 @@ int main()
 	// Initialize GLFW
 	glfwInit();
 
-	const unsigned int SCREEN_WIDTH = 1024;
-	const unsigned int SCREEN_HEIGHT = 1024;
+	const unsigned int SCREEN_WIDTH = 512;
+	const unsigned int SCREEN_HEIGHT = 512;
 
 	// Tell GLFW what version of OpenGL we are using 
 	// In this case we are using OpenGL 3.3
@@ -128,6 +137,26 @@ int main()
 	GLuint timeUniformComputeID = glGetUniformLocation(shaderProgram.computeID, "iTime");
 	float iTime;
 	GLuint resolutionUniformID = glGetUniformLocation(shaderProgram.ID, "iResolution");
+	GLuint numAgentsUniformID = glGetUniformLocation(shaderProgram.computeID, "numAgents");
+
+	GLuint agentsBuffer;
+	glGenBuffers(1, &agentsBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, agentsBuffer);
+	// Bind the buffer to binding point 1
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, agentsBuffer);
+
+	// Allocate memory for the agents (numAgents * sizeof(Agent))
+	glBufferData(GL_SHADER_STORAGE_BUFFER, numAgents * sizeof(Agent), nullptr, GL_DYNAMIC_DRAW);
+
+	std::vector<Agent> agentsVector(numAgents);
+
+	for (int i = 0; i < numAgents; ++i) {
+		agentsVector[i].pos[0] = 50 * std::cos(i * 2 * 3.14159 / numAgents) + 256;  // Start at (0, 0)
+		agentsVector[i].pos[1] = 50 * std::sin(i * 2 * 3.14159 / numAgents) + 256;  // Start at (0, 0)
+		agentsVector[i].angle = i * 2 * 3.14159 / numAgents;
+	}
+
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
 
 	int framebufferWidth, framebufferHeight;
 	// Restart the GLFW timer and start main while loop 
@@ -141,7 +170,8 @@ int main()
 		iTime = float(glfwGetTime());
 		shaderProgram.ActivateCompute();
 		glUniform1f(timeUniformComputeID, iTime);
-		glDispatchCompute(ceil(SCREEN_WIDTH / 8), ceil(SCREEN_HEIGHT / 8), 1);
+		glUniform1i(numAgentsUniformID, numAgents);
+		glDispatchCompute(1, 1, 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 		// Tell OpenGL which Shader Program we want to use

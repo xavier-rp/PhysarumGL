@@ -1,40 +1,46 @@
 #version 460 core
 
 uniform float iTime;
+uniform int numAgents;
+
+struct Agent
+{
+	vec2 pos;
+	float angle;
+	float pad; // Not quite sure yet, but The struct has to be a multiple of 8 bytes 
+};	
+
+layout (std430, binding = 1) buffer agentsBuffer{Agent agents[];};
 
 // total size (x*y*z) should be a multiple of 32 (Nvidia) or 64 (AMD)
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 
 layout(rgba32f, binding = 0) uniform image2D screen;
 
-uint hash(uint state)
-{
-    state ^= 2747636419u;
-    state *= 2654435769u;
-    state ^= state >> 16;
-    state *= 2654435769u;
-    state ^= state >> 16;
-    state *= 2654435769u;
-    return state;
-}
-
 void main()
 {
-	
-	vec4 pixel = vec4(0.75, 0.133, 0.173, 1.0);
-	ivec2 dims = imageSize(screen);
-	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	uint agentIndex = gl_GlobalInvocationID.x;
 
-	if (pixel_coords.x < 0 || pixel_coords.x >= dims.x || pixel_coords.y < 0 || pixel_coords.y >= dims.y ) { return; }
+    if (agentIndex >= uint(numAgents)) {
+		// Shows the invocations that haven't done work on an agent
+		vec4 pixel = vec4(1.0, 0.0, 1.0, 1.0);
+		ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.x * 2, 500);
+		imageStore(screen, pixel_coords, pixel);
+    }
+	else{
+		// Shows the invocations that have done work on an agent
+		vec4 pixel = vec4(1.0, 1.0, 0.0, 1.0);
+		ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.x * 2, 500);
+		imageStore(screen, pixel_coords, pixel);
 
-	int pixelIndex = pixel_coords.y * dims.x + pixel_coords.x;
-	uint pseudoRandomNumber = hash(pixelIndex * uint(iTime*1000));
+		pixel = vec4(1.0, 0.0, 0.0, 1.0);
+		Agent agent;
+		agent = agents[agentIndex];
+		agent.pos[0] += cos(agent.angle);
+		agent.pos[1] += sin(agent.angle);
+		pixel_coords = ivec2(int(agent.pos[0]), int(agent.pos[1]));
+		imageStore(screen, pixel_coords, pixel);
 
-	float randomValue = float(pseudoRandomNumber) / 4294967295.0;
-
-	pixel.x = randomValue;
-	pixel.y = randomValue;
-	pixel.z = randomValue;
-	
-	imageStore(screen, pixel_coords, pixel);
+		agents[agentIndex] = agent;
+	}
 }
