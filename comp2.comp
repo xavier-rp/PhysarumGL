@@ -20,13 +20,16 @@ void main()
 	ivec2 dims = imageSize(screen);
 
     uint trailMapIndex = getIndex(pixelCoords.x, pixelCoords.y);
-    vec4 color = imageLoad(screen, pixelCoords);
+    //vec4 color = imageLoad(screen, pixelCoords);
 
     float trail = trailMap[trailMapIndex];
     if (trail > 0.0f){
-        trailMap[trailMapIndex] = max(0.0f, trail-0.05);
+        trailMap[trailMapIndex] = max(0.0f, trail-0.01);
     }
 
+	vec4 color = vec4(trail, 0.0f, trail, 1.0f);
+
+	/*
     float sum = 0;
 	float originalCol = trailMap[trailMapIndex];
 	// 3x3 blur
@@ -39,8 +42,8 @@ void main()
 	}
 
 	float blurredCol = sum / 9.0f;
-
-    color = vec4(blurredCol, 0.0f, 0.0f, 1.0f);
+    color = vec4(blurredCol, blurredCol, 0.0f, 1.0f);
+	*/
 
 
     imageStore(screen, pixelCoords, color);

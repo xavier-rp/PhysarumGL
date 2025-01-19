@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "utils.h"
 #include "shaderClass.h"
 #include "VAO.h"
 #include "VBO.h"
@@ -11,52 +12,10 @@
 
 bool vSync = true;
 
-float PI = 3.141592653589793;
-
-int numAgents = 4194304;
-
-struct Agent
-{
-	float pos[2];
-	float angle;
-	float velocity;
-};
-
-struct AgentSettings {
-	float color[4] = {1.0f, 0.0f, 1.0f, 1.0f};
-	float sensorAngleOffset{22.5f * PI / 180.f};
-	int sensorOffsetDistance{9};
-	int sensorWidth{1};
-};
-
-// Vertices coordinates (first 3) and texture coordinates (last 2)
-GLfloat vertices[] =
-{
-	-1.0f, -1.0f , 0.0f, 0.0f, 0.0f,
-	-1.0f,  1.0f , 0.0f, 0.0f, 1.0f,
-	 1.0f,  1.0f , 0.0f, 1.0f, 1.0f,
-	 1.0f, -1.0f , 0.0f, 1.0f, 0.0f,
-};
-
-// Indices for vertices order
-GLuint indices[] =
-{
-	0, 3, 1,
-	1, 2, 3
-};
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-	//function to adjust height and width
-	glViewport(0, 0, width, height);
-}
-
 int main()
 {
 	// Initialize GLFW
 	glfwInit();
-
-	const unsigned int SCREEN_WIDTH = 512;
-	const unsigned int SCREEN_HEIGHT = 512;
 
 	// Tell GLFW what version of OpenGL we are using 
 	// In this case we are using OpenGL 3.3
@@ -85,9 +44,6 @@ int main()
 		std::cout << "Failed to initialize OpenGL context" << std::endl;
 	}
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-	// Sets the function to call when the window is resized
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	//Load GLAD so it configures OpenGL
 	gladLoadGL();
@@ -119,28 +75,7 @@ int main()
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("default.vert", "default.frag", "default.comp", "comp2.comp");
 
-	int work_grp_cnt[3];
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_grp_cnt[0]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &work_grp_cnt[1]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &work_grp_cnt[2]);
-	std::cout << "Max work groups per compute shader" <<
-		" x:" << work_grp_cnt[0] <<
-		" y:" << work_grp_cnt[1] <<
-		" z:" << work_grp_cnt[2] << "\n";
-
-	int work_grp_size[3];
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &work_grp_size[0]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &work_grp_size[1]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &work_grp_size[2]);
-	std::cout << "Max work group sizes" <<
-		" x:" << work_grp_size[0] <<
-		" y:" << work_grp_size[1] <<
-		" z:" << work_grp_size[2] << "\n";
-
-	int work_grp_inv;
-	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &work_grp_inv);
-	std::cout << "Max invocations count per work group: " << work_grp_inv << "\n";
-
+	shaderProgram.printMaxGroups();
 
 	// Gets ID of uniform called "iTime" and "iResolution"
 	GLuint timeUniformID = glGetUniformLocation(shaderProgram.ID, "iTime");
@@ -158,14 +93,8 @@ int main()
 	// Allocate memory for the agents (numAgents * sizeof(Agent))
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numAgents * sizeof(Agent), nullptr, GL_DYNAMIC_DRAW);
 
-	std::vector<Agent> agentsVector(numAgents);
-
-	for (int i = 0; i < numAgents; ++i) {
-		agentsVector[i].pos[0] = 50 * std::cos(static_cast<float>(i) * 2.0f * PI / numAgents) + static_cast<float>(SCREEN_WIDTH / 2);  // Start at (0, 0)
-		agentsVector[i].pos[1] = 50 * std::sin(static_cast<float>(i) * 2.0f * PI / numAgents) + static_cast<float>(SCREEN_HEIGHT / 2);  // Start at (0, 0)
-		agentsVector[i].angle = static_cast<float>(i) * 2.0f * PI / numAgents;
-		agentsVector[i].velocity = 1.0f;
-	}
+	std::vector<Agent> agentsVector;
+	agentsVector = spawnAgentsOnCircleRandom(numAgents, 50.0f);
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
 
@@ -183,9 +112,8 @@ int main()
 	GLuint agentSettingsBuffer;
 	glGenBuffers(1, &agentSettingsBuffer);
 	glBindBuffer(GL_UNIFORM_BUFFER, agentSettingsBuffer);
-	AgentSettings as;
 	// Allocate memory for the agents (sizeof(Agent))
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(AgentSettings), &as, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(AgentSettings), &agentSettings, GL_STATIC_DRAW);
 
 	// Bind the buffer to binding point 2
 	glBindBufferBase(GL_UNIFORM_BUFFER, 2, agentSettingsBuffer);

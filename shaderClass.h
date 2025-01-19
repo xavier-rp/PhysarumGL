@@ -29,6 +29,8 @@ public:
 	void ActivateCompute2();
 	// Deletes both Shader Programs
 	void Delete();
+
+	void printMaxGroups();
 private:
 	// Checks if the different Shaders have compiled properly
 	void compileErrors(unsigned int shader, const char* type);
