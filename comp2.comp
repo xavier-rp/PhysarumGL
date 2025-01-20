@@ -29,7 +29,7 @@ void main()
 	// We use the red channel as the container for the trail value
 	vec4 color = vec4(trail, 0.0f, 0.0f, 1.0f); 
 
-	
+	/*
     float sum = 0;
 	float originalCol = trailMap[trailMapIndex];
 	// 3x3 blur
@@ -43,6 +43,7 @@ void main()
 
 	float blurredCol = sum / 9.0f;
     color = vec4(blurredCol, 0.0f, 0.0f, 1.0f);
+	*/
 
     imageStore(screen, pixelCoords, color);
 

@@ -2,7 +2,7 @@
 
 const unsigned int SCREEN_WIDTH = 1024;
 const unsigned int SCREEN_HEIGHT = 1024;
-const int numAgents = 100000;
+const int numAgents = 500000;
 
 const float PI = 3.1415926535f;
 
@@ -52,7 +52,7 @@ std::vector<Agent> spawnAgentsOnCircleRandom(const int numAgents, float radius) 
 	std::mt19937 gen{ rd() };
 
 	std::uniform_real_distribution<float> dis_theta{ 0.0, 2 * PI };
-	std::uniform_real_distribution<float> dis_velocity{ 0.5, 1.5 };
+	std::uniform_real_distribution<float> dis_velocity{ 0.5, 1.0 };
 
 	for (int i = 0; i < numAgents; ++i) {
 		agentsVector[i].pos[0] = radius * std::cos(static_cast<float>(i) * 2.0f * PI / numAgents) + static_cast<float>(SCREEN_WIDTH / 2);  // Start at (0, 0)

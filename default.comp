@@ -87,7 +87,37 @@ float sense(Agent agent, float angle){
 	
 }
 
-void updateAgent(uint agentIndex){
+void drawArrowHeads(Agent agent, ivec2 dims){
+
+	ivec2 agentCoordOnGrid;
+	agentCoordOnGrid.x = int(agent.pos[0]);
+	agentCoordOnGrid.y = int(agent.pos[1]);
+	ivec2 pixelCoord;
+
+	uint trailMapIndex;
+
+	for (int offset_x = -1; offset_x <= 1; offset_x++) {
+		for (int offset_y = -1; offset_y <= 1; offset_y++) {
+			pixelCoord = agentCoordOnGrid + ivec2(offset_x, offset_y);
+
+			if (abs(offset_y * offset_x) == 0){
+				if (pixelCoord.x < dims.x && pixelCoord.x >= 0 && pixelCoord.y < dims.y && pixelCoord.x >= 0) {
+					trailMapIndex = getIndex(pixelCoord.x, pixelCoord.y);
+
+					if (offset_y == 0 && offset_x == 0) {
+						trailMap[trailMapIndex] = 0.9f;
+					}
+					else {
+						trailMap[trailMapIndex] = 0.9f;
+
+					}
+				}
+			}
+		}		
+	}
+}
+
+void updateAgentAndTrailMap(uint agentIndex){
 	ivec2 dims = imageSize(screen);
 	Agent agent = agents[agentIndex];
 
@@ -115,6 +145,8 @@ void updateAgent(uint agentIndex){
 	agent.pos[0] += agent.velocity * cos(agent.angle);
 	agent.pos[1] += agent.velocity * sin(agent.angle);
 
+	//Cyclical boundaries
+
 	if (agent.pos[0] > dims.x) {
 		agent.pos[0] -= float(dims.x);
 	}
@@ -129,9 +161,12 @@ void updateAgent(uint agentIndex){
 		agent.pos[1] += float(dims.y);
 	}	
 
-	uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));
-	trailMap[trailMapIndex] = 1.0f;
 	agents[agentIndex] = agent;
+	
+	drawArrowHeads(agent, dims);
+	//uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));
+	//trailMap[trailMapIndex] = 1.0f;
+
 
 }
 
@@ -152,7 +187,7 @@ void main()
 		//ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
 		//imageStore(screen, pixel_coords, color);
 
-		updateAgent(agentIndex);
+		updateAgentAndTrailMap(agentIndex);
 	
 	}
 }
