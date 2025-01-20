@@ -12,7 +12,7 @@ extern const float PI;
 extern GLfloat vertices[20];
 extern GLuint indices[6];
 
-
+/* UPDATES OF THESE STRUCTS HAVE TO BE IMPLEMENTED IN THE SHADERS AS WELL*/
 struct Agent
 {
 	float pos[2];
@@ -21,10 +21,10 @@ struct Agent
 };
 
 struct AgentSettings {
-	float color[4];
 	float sensorAngleOffset;
 	int sensorOffsetDistance;
 	int sensorWidth;
+	float turningSpeed;
 };
 
 extern AgentSettings agentSettings;

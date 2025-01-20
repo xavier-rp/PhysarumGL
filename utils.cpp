@@ -1,17 +1,17 @@
 #include "utils.h"
 
 const unsigned int SCREEN_WIDTH = 1024;
-const unsigned int SCREEN_HEIGHT = 768;
-const int numAgents = 10000;
+const unsigned int SCREEN_HEIGHT = 1024;
+const int numAgents = 100000;
 
 const float PI = 3.1415926535f;
 
 AgentSettings agentSettings = 
 {
-	{ 0.0f, 0.0f, 1.0f, 1.0f },	//float color[4]
 	22.5f * PI / 180.f,			//float sensorAngleOffset
 	9,							//int sensorOffsetDistance
-	1							//int sensorWidth
+	1,							//int sensorWidth
+	0.2						//float turningSpeed
 };
 
 // Vertices coordinates (first 3) and texture coordinates (last 2)

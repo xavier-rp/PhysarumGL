@@ -14,10 +14,10 @@ struct Agent
 layout (std430, binding = 1) buffer agentsBuffer{Agent agents[];};
 
 struct AgentSettings {
-	vec4 color;
 	float sensorAngleOffset;
 	int sensorOffsetDistance;
 	int sensorWidth;
+	float turningSpeed;
 };
 
 layout (std140, binding = 2) uniform agentSettingsBuffer{AgentSettings settings;};
@@ -43,11 +43,20 @@ uint hash(uint state)
     return state;
 }
 
+float random(float seed) {
+    return fract(sin(seed) * 43758.5453);
+}
+
+float randomInRange(float min, float max, float seed) {
+    return min + (max - min) * random(seed);
+}
+
 uint getIndex(int x, int y) {
     return y * imageSize(screen).x + x;
 }
 
 float sense(Agent agent, float angle){
+	ivec2 dims = imageSize(screen);
 	float sensorAngle = agent.angle + angle;
 	vec2 sensorDir = vec2(cos(sensorAngle), sin(sensorAngle));
 
@@ -59,10 +68,18 @@ float sense(Agent agent, float angle){
 
 	for (int offsetX = -settings.sensorWidth; offsetX <= settings.sensorWidth; offsetX ++) {
 		for (int offsetY = -settings.sensorWidth; offsetY <= settings.sensorWidth; offsetY ++) {
+
 			int sampleX = sensorCentreX + offsetX;
 			int sampleY = sensorCentreY + offsetY;
-			uint trailMapIndex = getIndex(sampleX, sampleY);
-			sum += trailMap[trailMapIndex];
+
+			if (sampleX < dims.x && sampleX >= 0 && sampleY < dims.y && sampleY >= 0){
+				uint trailMapIndex = getIndex(sampleX, sampleY);
+				sum += trailMap[trailMapIndex];
+			}
+			else{
+				sum += 0.0f;
+			}
+
 		}
 	}
 
@@ -85,14 +102,14 @@ void updateAgent(uint agentIndex){
 	}
 	// Turn right
 	else if (weightRight > weightLeft) {
-		agent.angle -= (settings.sensorAngleOffset * 0.2f);
+		agent.angle -= (settings.sensorAngleOffset * settings.turningSpeed);
 	}
 	// Turn left
 	else if (weightLeft > weightRight) {
-		agent.angle += (settings.sensorAngleOffset * 0.2f);
+		agent.angle += (settings.sensorAngleOffset * settings.turningSpeed);
 	}
 	else{
-		agent.angle += 0.0f;
+		agent.angle += randomInRange(-0.2f, 0.2f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])); // 0.2 rad is about 11.45 degrees
 	}
 
 	agent.pos[0] += agent.velocity * cos(agent.angle);
@@ -111,10 +128,6 @@ void updateAgent(uint agentIndex){
 	else if (agent.pos[1] < 0){
 		agent.pos[1] += float(dims.y);
 	}	
-
-	//vec4 color = settings.color;
-	//ivec2 pixel_coords = ivec2(int(agent.pos[0]), int(agent.pos[1]));
-	//imageStore(screen, pixel_coords, color);
 
 	uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));
 	trailMap[trailMapIndex] = 1.0f;
