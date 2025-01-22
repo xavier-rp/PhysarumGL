@@ -5,6 +5,29 @@ uniform sampler2D screen;
 uniform float iTime;
 in vec2 texCoord;
 
+const float kernel3x3[9] = float[9](
+    1.0, 2.0, 1.0,
+    2.0, 4.0, 2.0,
+    1.0, 2.0, 1.0
+);
+
+// 4x4 Gaussian Kernel (normalized)
+const float kernel4x4[16] = float[16](
+    1.0,  4.0,  6.0,  4.0,
+    4.0, 16.0, 24.0, 16.0,
+    6.0, 24.0, 36.0, 24.0,
+    4.0, 16.0, 24.0, 16.0
+);
+
+// 5x5 Gaussian Kernel (normalized)
+const float kernel5x5[25] = float[25](
+    1.0,  4.0,  6.0,  4.0,  1.0,
+    4.0, 16.0, 24.0, 16.0,  4.0,
+    6.0, 24.0, 36.0, 24.0,  6.0,
+    4.0, 16.0, 24.0, 16.0,  4.0,
+    1.0,  4.0,  6.0,  4.0,  1.0
+);
+
 // function to generate cycling color palettes
 // https://iquilezles.org/articles/palettes/
 // http://dev.thi.ng/gradients/
@@ -43,6 +66,56 @@ vec4 gaussianBlur()
 
 }
 
+vec4 gaussianBlur3x3()
+{
+    vec2 texOffset = 1.0 / textureSize(screen, 0);  // Calculates the offset for sampling neighboring texels
+
+    // Initialize the result color
+
+    vec4 result = vec4(0.0);
+    // Loop over the 3x3 kernel and apply the blur
+    int index = 0; // Index for accessing the kernel array
+    for (int x = -1; x <= 1; ++x) {
+        for (int y = -1; y <= 1; ++y) {
+            vec2 offset = vec2(x, y) * texOffset;      // Offset for the neighboring texel
+            float weight = kernel3x3[index] / 16.0; // Get the weight from the kernel (normalized)
+
+            // Add the weighted color value to the result
+            result += texture(screen, texCoord + offset) * weight;
+
+            index++; // Move to the next element in the kernel array
+        }
+    }
+
+    return result;
+
+}
+
+vec4 gaussianBlur5x5()
+{
+    vec2 texOffset = 1.0 / textureSize(screen, 0);  // Calculates the offset for sampling neighboring texels
+
+    // Initialize the result color
+
+    vec4 result = vec4(0.0);
+    // Loop over the 3x3 kernel and apply the blur
+    int index = 0; // Index for accessing the kernel array
+    for (int x = -2; x <= 2; ++x) {
+        for (int y = -2; y <= 2; ++y) {
+            vec2 offset = vec2(x, y) * texOffset;      // Offset for the neighboring texel
+            float weight = kernel5x5[index] / 256.0; // Get the weight from the kernel (normalized)
+
+            // Add the weighted color value to the result
+            result += texture(screen, texCoord + offset) * weight;
+
+            index++; // Move to the next element in the kernel array
+        }
+    }
+
+    return result;
+
+}
+
 float random(vec2 p) {
     return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
@@ -52,15 +125,27 @@ void main()
 	// Sample the color from the texture at the given texture coordinates
     vec4 texColor = texture(screen, texCoord);
 
-    //vec4 texColor = gaussianBlur();//texture(screen, texCoord);
+    if (texColor.a < 0.20){
 
+        vec3 fadingCol = mix(vec3(0.0f, 0.0f, 0.0f), texColor.rgb, smoothstep(0.0f, 1.0f, 5.0*texColor.a));
 
+        texColor.rgb = fadingCol;
+        
+    }
+
+    //vec3 fadingCol = mix(vec3(0.0f, 0.0f, 0.0f), texColor.rgb, smoothstep(-0.3, 1.0f, texColor.a));
+
+    //texColor.rgb = fadingCol;
+
+    //vec4 texColor = gaussianBlur3x3();//texture(screen, texCoord);
+    /*
+    texColor.a = texColor.r;
 	if (texColor.r > 0.00001f) {
 
 		texColor.rgb = palette(texColor.r);
 	}	
-
-
+    */
+    //texColor = vec4(texColor.a);
 	FragColor = texColor;
 
     /*

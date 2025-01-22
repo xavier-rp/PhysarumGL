@@ -9,6 +9,18 @@ layout(std430, binding = 3) buffer TrailMapBuffer {
     float trailMap[];  // This is a 1D array representing the 2D matrix
 };
 
+// function to generate cycling color palettes
+// https://iquilezles.org/articles/palettes/
+// http://dev.thi.ng/gradients/
+vec3 palette(float t)
+{
+	vec3 a = vec3(0.731, 1.098, 0.192);
+	vec3 b = vec3(0.358, 1.090, 0.657); 
+	vec3 c = vec3(1.077, 0.360, 0.328);
+	vec3 d = vec3(0.965, 2.265, 0.837);
+	return a + b*cos( 6.28318*(c*t+d));
+}
+
 uint getIndex(int x, int y) {
     return y * imageSize(screen).x + x;
 }
@@ -22,16 +34,14 @@ void main()
     uint trailMapIndex = getIndex(pixelCoords.x, pixelCoords.y);
 
     float trail = trailMap[trailMapIndex];
-    if (trail > 0.0f){
-        trailMap[trailMapIndex] = max(0.0f, trail-0.01);
-    }
-
-	// We use the red channel as the container for the trail value
-	vec4 color = vec4(trail, 0.0f, 0.0f, 1.0f); 
-
 	/*
+    if (trail > 0.0f){
+        trailMap[trailMapIndex] = max(0.0f, trail-0.001);
+    }
+	*/
+	vec4 color; 
+
     float sum = 0;
-	float originalCol = trailMap[trailMapIndex];
 	// 3x3 blur
 	for (int offsetX = -1; offsetX <= 1; offsetX ++) {
 		for (int offsetY = -1; offsetY <= 1; offsetY ++) {
@@ -42,9 +52,20 @@ void main()
 	}
 
 	float blurredCol = sum / 9.0f;
-    color = vec4(blurredCol, 0.0f, 0.0f, 1.0f);
+	float diffuseWeight = 0.9f;
+	blurredCol = trail *(1 - diffuseWeight) + blurredCol * diffuseWeight;
+	trailMap[trailMapIndex] = max(0.0f, blurredCol-0.0001);
+	
+	
+	if (blurredCol > 0.0f){
+		color = vec4(palette(blurredCol), blurredCol); 
+	}
+	/*
+	else{
+		color = vec4(vec3(0.0f), 1.0f); // Background color
+	}
 	*/
-
+	
     imageStore(screen, pixelCoords, color);
 
 }

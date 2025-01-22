@@ -94,7 +94,9 @@ int main()
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numAgents * sizeof(Agent), nullptr, GL_DYNAMIC_DRAW);
 
 	std::vector<Agent> agentsVector;
-	agentsVector = spawnAgentsOnCircleRandom(numAgents, 50.0f);
+	agentsVector = spawnAgentsOnCircle(numAgents, 256.0f);
+	//agentsVector = spawnAgentsOnCircleRandom(numAgents, 256.0f);
+	//agentsVector = spawnAgentsInsideCircleRandom(numAgents, 256.0f);
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
 

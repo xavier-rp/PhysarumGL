@@ -87,7 +87,7 @@ float sense(Agent agent, float angle){
 	
 }
 
-void drawArrowHeads(Agent agent, ivec2 dims){
+void drawCrossHeads(Agent agent, ivec2 dims, int sidesSize){
 
 	ivec2 agentCoordOnGrid;
 	agentCoordOnGrid.x = int(agent.pos[0]);
@@ -96,8 +96,8 @@ void drawArrowHeads(Agent agent, ivec2 dims){
 
 	uint trailMapIndex;
 
-	for (int offset_x = -1; offset_x <= 1; offset_x++) {
-		for (int offset_y = -1; offset_y <= 1; offset_y++) {
+	for (int offset_x = -sidesSize; offset_x <= sidesSize; offset_x++) {
+		for (int offset_y = -sidesSize; offset_y <= sidesSize; offset_y++) {
 			pixelCoord = agentCoordOnGrid + ivec2(offset_x, offset_y);
 
 			if (abs(offset_y * offset_x) == 0){
@@ -105,14 +105,43 @@ void drawArrowHeads(Agent agent, ivec2 dims){
 					trailMapIndex = getIndex(pixelCoord.x, pixelCoord.y);
 
 					if (offset_y == 0 && offset_x == 0) {
-						trailMap[trailMapIndex] = 0.9f;
+						trailMap[trailMapIndex] = 1.0f;
 					}
 					else {
-						trailMap[trailMapIndex] = 0.9f;
+						trailMap[trailMapIndex] = 1.0f;
 
 					}
 				}
 			}
+		}		
+	}
+}
+
+void drawSquareHeads(Agent agent, ivec2 dims, int headSize){
+
+	ivec2 agentCoordOnGrid;
+	agentCoordOnGrid.x = int(agent.pos[0]);
+	agentCoordOnGrid.y = int(agent.pos[1]);
+	ivec2 pixelCoord;
+
+	uint trailMapIndex;
+
+	for (int offset_x = -headSize; offset_x <= headSize; offset_x++) {
+		for (int offset_y = -headSize; offset_y <= headSize; offset_y++) {
+
+			pixelCoord = agentCoordOnGrid + ivec2(offset_x, offset_y);
+				if (pixelCoord.x < dims.x && pixelCoord.x >= 0 && pixelCoord.y < dims.y && pixelCoord.x >= 0) {
+					trailMapIndex = getIndex(pixelCoord.x, pixelCoord.y);
+
+					if (offset_y == 0 && offset_x == 0) {
+						trailMap[trailMapIndex] = 1.0f;
+					}
+					else {
+						trailMap[trailMapIndex] = 1.0f;
+
+				}
+			}
+			
 		}		
 	}
 }
@@ -163,7 +192,8 @@ void updateAgentAndTrailMap(uint agentIndex){
 
 	agents[agentIndex] = agent;
 	
-	drawArrowHeads(agent, dims);
+	drawCrossHeads(agent, dims, 1);
+	//drawSquareHeads(agent, dims, 1);
 	//uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));
 	//trailMap[trailMapIndex] = 1.0f;
 

@@ -31,3 +31,4 @@ extern AgentSettings agentSettings;
 
 std::vector<Agent> spawnAgentsOnCircle(const int numAgents, float radius);
 std::vector<Agent> spawnAgentsOnCircleRandom(const int numAgents, float radius);
+std::vector<Agent> spawnAgentsInsideCircleRandom(const int numAgents, float radius);
