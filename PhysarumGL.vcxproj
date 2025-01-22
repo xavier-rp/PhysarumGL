@@ -146,8 +146,8 @@
     <ClCompile Include="VBO.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="comp2.comp" />
-    <None Include="default.comp" />
+    <None Include="trailProcessing.comp" />
+    <None Include="agentSimulation.comp" />
     <None Include="default.frag" />
     <None Include="default.vert" />
   </ItemGroup>

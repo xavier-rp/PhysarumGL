@@ -47,10 +47,10 @@
     <None Include="default.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="default.comp">
+    <None Include="agentSimulation.comp">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="comp2.comp">
+    <None Include="trailProcessing.comp">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

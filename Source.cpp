@@ -73,7 +73,7 @@ int main()
 	glBindImageTexture(0, screenTex, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgram("default.vert", "default.frag", "default.comp", "comp2.comp");
+	Shader shaderProgram("default.vert", "default.frag", "agentSimulation.comp", "trailProcessing.comp");
 
 	shaderProgram.printMaxGroups();
 
