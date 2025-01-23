@@ -2,7 +2,7 @@
 
 const unsigned int SCREEN_WIDTH = 1024;
 const unsigned int SCREEN_HEIGHT = 1024;
-const int numAgents = 1;
+const int numAgents = 1000000;
 
 const float PI = 3.1415926535f;
 

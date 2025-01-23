@@ -96,7 +96,7 @@ int main()
 	std::vector<Agent> agentsVector;
 	agentsVector = spawnAgentsOnCircle(numAgents, 256.0f);
 	//agentsVector = spawnAgentsOnCircleRandom(numAgents, 256.0f);
-	//agentsVector = spawnAgentsInsideCircleRandom(numAgents, 256.0f);
+	//agentsVector = spawnAgentsInsideCircleRandom(numAgents, 500.0f);
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
 

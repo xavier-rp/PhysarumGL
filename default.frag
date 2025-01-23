@@ -40,9 +40,8 @@ vec3 palette(float t)
 	return a + b*cos( 6.28318*(c*t+d));
 }
 
-vec4 gaussianBlur()
+vec4 averageBlur()
 {
-    // Define the 3x3 kernel for blur (simple average for example)
     vec2 texOffset = 1.0 / textureSize(screen, 0); // Gets the texture size (width, height)
     
     // Sample the 9 surrounding texels
@@ -127,34 +126,13 @@ void main()
 
     if (texColor.a < 0.20){
 
-        vec3 fadingCol = mix(vec3(0.0f, 0.0f, 0.0f), texColor.rgb, smoothstep(0.0f, 1.0f, 5.0*texColor.a));
-
-        texColor.rgb = fadingCol;
+        texColor.rgb = mix(vec3(0.0f, 0.0f, 0.0f), texColor.rgb, smoothstep(0.0f, 1.0f, 5.0*texColor.a));
         
     }
 
-    //vec3 fadingCol = mix(vec3(0.0f, 0.0f, 0.0f), texColor.rgb, smoothstep(-0.3, 1.0f, texColor.a));
-
-    //texColor.rgb = fadingCol;
-
     //vec4 texColor = gaussianBlur3x3();//texture(screen, texCoord);
-    /*
-    texColor.a = texColor.r;
-	if (texColor.r > 0.00001f) {
 
-		texColor.rgb = palette(texColor.r);
-	}	
-    */
-    //texColor = vec4(texColor.a);
 	FragColor = texColor;
 
-    /*
 
-    vec2 p = texCoord.xy + iTime * 0.1; // Adding time-based shift to coords
-    float randomValue = random(p);
-    FragColor = vec4(randomValue, randomValue, randomValue, 1.0);
-
-    */
-
-	//FragColor = texture(screen, texCoord);
 }

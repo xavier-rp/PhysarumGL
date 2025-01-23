@@ -193,7 +193,7 @@ void updateAgentAndTrailMap(uint agentIndex){
 	agents[agentIndex] = agent;
 	
 	drawCrossHeads(agent, dims, 1);
-	//drawSquareHeads(agent, dims, 1);
+	//drawSquareHeads(agent, dims, 2);
 	//uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));
 	//trailMap[trailMapIndex] = 1.0f;
 

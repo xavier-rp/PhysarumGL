@@ -9,6 +9,12 @@ layout(std430, binding = 3) buffer TrailMapBuffer {
     float trailMap[];  // This is a 1D array representing the 2D matrix
 };
 
+const float kernel3x3[9] = float[9](
+    1.0, 2.0, 1.0,
+    2.0, 4.0, 2.0,
+    1.0, 2.0, 1.0
+);
+
 // function to generate cycling color palettes
 // https://iquilezles.org/articles/palettes/
 // http://dev.thi.ng/gradients/
@@ -25,6 +31,48 @@ uint getIndex(int x, int y) {
     return y * imageSize(screen).x + x;
 }
 
+float averageBlur3x3(ivec2 pixelCoords)
+{
+
+	float sum = 0;
+	// 3x3 blur
+	int index = 0; // Index for accessing the kernel array
+	for (int offsetX = -1; offsetX <= 1; offsetX ++) {
+		for (int offsetY = -1; offsetY <= 1; offsetY ++) {
+			int sampleX = pixelCoords.x + offsetX;
+			int sampleY = pixelCoords.y + offsetY;
+			sum += (trailMap[getIndex(sampleX,sampleY)]);
+
+			index++; // Move to the next element in the kernel array
+		}
+	}
+
+	sum = sum / 9.0f;
+
+	return sum;
+}
+
+float gaussianBlur3x3(ivec2 pixelCoords)
+{
+
+	float sum = 0;
+	// 3x3 blur
+	int index = 0; // Index for accessing the kernel array
+	for (int offsetX = -1; offsetX <= 1; offsetX ++) {
+		for (int offsetY = -1; offsetY <= 1; offsetY ++) {
+			int sampleX = pixelCoords.x + offsetX;
+			int sampleY = pixelCoords.y + offsetY;
+			float weight = kernel3x3[index] / 16.0;
+
+			sum += (trailMap[getIndex(sampleX,sampleY)] * weight);
+
+			index++; // Move to the next element in the kernel array
+		}
+	}
+
+	return sum;
+}
+
 void main()
 {
     
@@ -34,37 +82,18 @@ void main()
     uint trailMapIndex = getIndex(pixelCoords.x, pixelCoords.y);
 
     float trail = trailMap[trailMapIndex];
-	/*
-    if (trail > 0.0f){
-        trailMap[trailMapIndex] = max(0.0f, trail-0.001);
-    }
-	*/
+
 	vec4 color; 
 
-    float sum = 0;
-	// 3x3 blur
-	for (int offsetX = -1; offsetX <= 1; offsetX ++) {
-		for (int offsetY = -1; offsetY <= 1; offsetY ++) {
-			int sampleX = pixelCoords.x + offsetX;
-			int sampleY = pixelCoords.y + offsetY;
-			sum += trailMap[getIndex(sampleX,sampleY)];
-		}
-	}
-
-	float blurredCol = sum / 9.0f;
-	float diffuseWeight = 0.9f;
-	blurredCol = trail *(1 - diffuseWeight) + blurredCol * diffuseWeight;
-	trailMap[trailMapIndex] = max(0.0f, blurredCol-0.0001);
+    float blurredTrail = gaussianBlur3x3(pixelCoords);
+	float diffuseWeight = 0.4f;
+	blurredTrail = trail *(1 - diffuseWeight) + blurredTrail * diffuseWeight;
+	trailMap[trailMapIndex] = max(0.0f, blurredTrail-0.01);
 	
 	
-	if (blurredCol > 0.0f){
-		color = vec4(palette(blurredCol), blurredCol); 
+	if (blurredTrail > 0.0f){
+		color = vec4(palette(blurredTrail), blurredTrail); 
 	}
-	/*
-	else{
-		color = vec4(vec3(0.0f), 1.0f); // Background color
-	}
-	*/
 	
     imageStore(screen, pixelCoords, color);
 
