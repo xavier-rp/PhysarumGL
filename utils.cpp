@@ -2,9 +2,12 @@
 
 const unsigned int SCREEN_WIDTH = 1024;
 const unsigned int SCREEN_HEIGHT = 1024;
-const int numAgents = 1000000;
+const int numAgents = 10000;
 
 const float PI = 3.1415926535f;
+
+const float diffuseWeight = 0.7f;
+const float evaporationRate = 0.001f;
 
 AgentSettings agentSettings = 
 {

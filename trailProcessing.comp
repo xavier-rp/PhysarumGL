@@ -1,5 +1,8 @@
 #version 460 core
 
+uniform float diffuseWeight;
+uniform float evaporationRate;
+
 // total size (x*y*z) should be a multiple of 32 (Nvidia) or 64 (AMD)
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -86,13 +89,11 @@ void main()
 	vec4 color; 
 
     float blurredTrail = gaussianBlur3x3(pixelCoords);
-	float diffuseWeight = 0.4f;
 	blurredTrail = trail *(1 - diffuseWeight) + blurredTrail * diffuseWeight;
-	trailMap[trailMapIndex] = max(0.0f, blurredTrail-0.01);
-	
+	trailMap[trailMapIndex] = max(0.0f, blurredTrail-evaporationRate);	
 	
 	if (blurredTrail > 0.0f){
-		color = vec4(palette(blurredTrail), blurredTrail); 
+		color = vec4(palette(blurredTrail), blurredTrail);
 	}
 	
     imageStore(screen, pixelCoords, color);

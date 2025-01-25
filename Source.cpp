@@ -84,6 +84,9 @@ int main()
 	GLuint resolutionUniformID = glGetUniformLocation(shaderProgram.ID, "iResolution");
 	GLuint numAgentsUniformID = glGetUniformLocation(shaderProgram.computeID, "numAgents");
 
+	GLuint diffuseWeightID = glGetUniformLocation(shaderProgram.computeID2, "diffuseWeight");
+	GLuint evaporationRateID = glGetUniformLocation(shaderProgram.computeID2, "evaporationRate");
+
 	GLuint agentsBuffer;
 	glGenBuffers(1, &agentsBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, agentsBuffer);
@@ -94,8 +97,8 @@ int main()
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numAgents * sizeof(Agent), nullptr, GL_DYNAMIC_DRAW);
 
 	std::vector<Agent> agentsVector;
-	agentsVector = spawnAgentsOnCircle(numAgents, 256.0f);
-	//agentsVector = spawnAgentsOnCircleRandom(numAgents, 256.0f);
+	//agentsVector = spawnAgentsOnCircle(numAgents, 512.0f);
+	agentsVector = spawnAgentsOnCircleRandom(numAgents, 256.0f);
 	//agentsVector = spawnAgentsInsideCircleRandom(numAgents, 500.0f);
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
@@ -138,8 +141,8 @@ int main()
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 		shaderProgram.ActivateCompute2();
-		//glUniform1f(timeUniformComputeID, iTime);
-		//glUniform1i(numAgentsUniformID, numAgents);
+		glUniform1f(diffuseWeightID, diffuseWeight);
+		glUniform1f(evaporationRateID, evaporationRate);
 		glDispatchCompute(ceil(SCREEN_WIDTH / 8), ceil(SCREEN_HEIGHT / 8), 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 

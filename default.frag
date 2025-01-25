@@ -124,9 +124,9 @@ void main()
 	// Sample the color from the texture at the given texture coordinates
     vec4 texColor = texture(screen, texCoord);
 
-    if (texColor.a < 0.20){
+    if (texColor.a < 0.10){
 
-        texColor.rgb = mix(vec3(0.0f, 0.0f, 0.0f), texColor.rgb, smoothstep(0.0f, 1.0f, 5.0*texColor.a));
+        texColor.rgb = mix(vec3(0.0f, 0.0f, 0.0f), texColor.rgb, smoothstep(0.0f, 1.0f, 10.0*texColor.a));
         
     }
 

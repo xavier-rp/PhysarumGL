@@ -8,6 +8,8 @@ extern const unsigned int SCREEN_WIDTH;
 extern const unsigned int SCREEN_HEIGHT;
 extern const int numAgents;
 extern const float PI;
+extern const float diffuseWeight;
+extern const float evaporationRate;
 
 extern GLfloat vertices[20];
 extern GLuint indices[6];
