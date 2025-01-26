@@ -3,6 +3,8 @@
 #include <chrono>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <SFML/Audio.hpp>
+#include <SFML/System.hpp>
 
 #include "utils.h"
 #include "shaderClass.h"
@@ -127,6 +129,8 @@ int main()
 	// Restart the GLFW timer and start main while loop 
 	glfwSetTime(0.0);
 	std::cout << numAgents / 128.0f << "  " << ceil(numAgents / 128.0f) << std::endl;
+	sf::Music music("audio/16mm.wav");
+	music.play();
 	while (!glfwWindowShouldClose(window))
 	{
 		// Specify the color of the background

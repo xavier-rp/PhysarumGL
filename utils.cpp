@@ -6,7 +6,7 @@ const int numAgents = 1000000;
 
 const float PI = 3.1415926535f;
 
-const float diffuseWeight = 0.9f;
+const float diffuseWeight = 0.1f;
 const float evaporationRate = 0.01f;
 
 AgentSettings agentSettings = 
