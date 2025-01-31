@@ -2,6 +2,8 @@
 
 uniform float diffuseWeight;
 uniform float evaporationRate;
+uniform float iTime;
+uniform float iBass;
 
 // total size (x*y*z) should be a multiple of 32 (Nvidia) or 64 (AMD)
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
@@ -87,13 +89,19 @@ void main()
     float trail = trailMap[trailMapIndex];
 
 	vec4 color; 
+	vec3 maxColor;
 
     float blurredTrail = gaussianBlur3x3(pixelCoords);
-	blurredTrail = trail *(1 - diffuseWeight) + blurredTrail * diffuseWeight;
+	blurredTrail = trail * (1 - diffuseWeight) + blurredTrail * diffuseWeight;
 	trailMap[trailMapIndex] = max(0.0f, blurredTrail-evaporationRate);	
 	
-	if (blurredTrail > 0.0f){
+	if (blurredTrail > 0.7f){
+		color = vec4(palette(blurredTrail + iBass/6), blurredTrail); //This way only the heads glow with the energy of the bass
+	}
+	else if (blurredTrail > 0.0f){
 		color = vec4(palette(blurredTrail), blurredTrail);
+		//maxColor = vec3(palette(blurredTrail));
+		//color.rgb = color.rgb + iBass * (vec3(1.0) - color.rgb);
 	}
 	
     imageStore(screen, pixelCoords, color);

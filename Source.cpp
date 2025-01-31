@@ -3,13 +3,15 @@
 #include <chrono>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <fftw3.h>
 
-#include "AudioStream.h"
 #include "utils.h"
 #include "shaderClass.h"
 #include "VAO.h"
 #include "VBO.h"
 #include "EBO.h"
+#include "AudioStream.h"
+#include "fftUtils.h"
 
 bool vSync = true;
 
@@ -81,12 +83,16 @@ int main()
 	// Gets ID of uniform called "iTime" and "iResolution"
 	GLuint timeUniformID = glGetUniformLocation(shaderProgram.ID, "iTime");
 	GLuint timeUniformComputeID = glGetUniformLocation(shaderProgram.computeID, "iTime");
+	GLuint timeUniformComputeID2 = glGetUniformLocation(shaderProgram.computeID2, "iTime");
 	float iTime;
 	GLuint resolutionUniformID = glGetUniformLocation(shaderProgram.ID, "iResolution");
 	GLuint numAgentsUniformID = glGetUniformLocation(shaderProgram.computeID, "numAgents");
+	GLuint highEnergyUniformID = glGetUniformLocation(shaderProgram.computeID, "highEnergy");
+	GLuint bassEnergyuniformID = glGetUniformLocation(shaderProgram.computeID, "iBass");
 
 	GLuint diffuseWeightID = glGetUniformLocation(shaderProgram.computeID2, "diffuseWeight");
 	GLuint evaporationRateID = glGetUniformLocation(shaderProgram.computeID2, "evaporationRate");
+	GLuint bassEnergyuniformID2 = glGetUniformLocation(shaderProgram.computeID2, "iBass");
 
 	GLuint agentsBuffer;
 	glGenBuffers(1, &agentsBuffer);
@@ -99,8 +105,8 @@ int main()
 
 	std::vector<Agent> agentsVector;
 	//agentsVector = spawnAgentsOnCircle(numAgents, 512.0f);
-	agentsVector = spawnAgentsOnCircleRandom(numAgents, 256.0f);
-	//agentsVector = spawnAgentsInsideCircleRandom(numAgents, 500.0f);
+	//agentsVector = spawnAgentsOnCircleRandom(numAgents, 350.0f);
+	agentsVector = spawnAgentsInsideCircleRandom(numAgents, 20.0f);
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
 
@@ -131,15 +137,36 @@ int main()
 
 	// load an audio buffer from a sound file
 	const sf::SoundBuffer buffer("audio/16mm.wav");
+	std::cout << buffer.getSampleRate() << std::endl;
+	std::cout << buffer.getChannelCount() << std::endl;
 	AudioStream music;
 	music.load(buffer);
 	music.play();
 	//sf::Music music("audio/16mm.wav");
-	
+	std::vector<float> amplitudes;
 	//music.play();
+	double lastTriggerTime{ 1.0 }; // Non value zero to let time to the music object to fill its first fftBuffer
+	float maxBassEnergy = 0.0f;
+	float bassEnergy{ 0.0 };
+	float maxHighEnergy = 0.0f;
+	float highEnergy{ 0.0 };
 	while (!glfwWindowShouldClose(window))
 	{
+
 		// Specify the color of the background
+		
+		if (glfwGetTime() - lastTriggerTime > 0.007f) {
+			//std::cout << lastTriggerTime << std::endl;
+			amplitudes = computeFrequencyAmplitudes(music.fftBuffer);
+			bassEnergy = computeBassEnergy(amplitudes);
+			highEnergy = computeHighEnergy(amplitudes);
+			//std::cout << bassEnergy << "  " << maxBassEnergy << std::endl;
+			maxBassEnergy = (bassEnergy > maxBassEnergy) ? bassEnergy : maxBassEnergy;
+			maxHighEnergy = (highEnergy > maxHighEnergy) ? highEnergy : maxHighEnergy;
+			std::cout << highEnergy << "  " << maxHighEnergy << std::endl;
+			lastTriggerTime = glfwGetTime();
+		}
+		
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -147,12 +174,16 @@ int main()
 		shaderProgram.ActivateCompute();
 		glUniform1f(timeUniformComputeID, iTime);
 		glUniform1i(numAgentsUniformID, numAgents);
+		glUniform1f(highEnergyUniformID, highEnergy/maxHighEnergy);
+		glUniform1f(bassEnergyuniformID, bassEnergy/maxBassEnergy);
 		glDispatchCompute(ceil(numAgents / 128.0f), 1, 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 		shaderProgram.ActivateCompute2();
 		glUniform1f(diffuseWeightID, diffuseWeight);
 		glUniform1f(evaporationRateID, evaporationRate);
+		glUniform1f(bassEnergyuniformID2, bassEnergy);
+		glUniform1f(timeUniformComputeID2, iTime);
 		glDispatchCompute(ceil(SCREEN_WIDTH / 8), ceil(SCREEN_HEIGHT / 8), 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 

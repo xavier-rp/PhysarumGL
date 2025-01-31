@@ -2,6 +2,8 @@
 
 uniform float iTime;
 uniform int numAgents;
+uniform float highEnergy;
+uniform float iBass;
 
 struct Agent
 {
@@ -151,28 +153,39 @@ void updateAgentAndTrailMap(uint agentIndex){
 	Agent agent = agents[agentIndex];
 
 	// Steer based on sensory data
-	float weightForward = sense(agent, 0);
-	float weightLeft = sense(agent, settings.sensorAngleOffset);
-	float weightRight = sense(agent, -settings.sensorAngleOffset);
+	if (highEnergy < 0.7){
+		float weightForward = sense(agent, 0);
+		float weightLeft = sense(agent, settings.sensorAngleOffset);
+		float weightRight = sense(agent, -settings.sensorAngleOffset);
 
-	// Continue in same direction
-	if (weightForward > weightLeft && weightForward > weightRight) {
-		agent.angle += 0.0f;
-	}
-	// Turn right
-	else if (weightRight > weightLeft) {
-		agent.angle -= (settings.sensorAngleOffset * settings.turningSpeed);
-	}
-	// Turn left
-	else if (weightLeft > weightRight) {
-		agent.angle += (settings.sensorAngleOffset * settings.turningSpeed);
+		// Continue in same direction
+		if (weightForward > weightLeft && weightForward > weightRight) {
+			agent.angle += 0.0f;
+		}
+		// Turn right
+		else if (weightRight > weightLeft) {
+			agent.angle -= (settings.sensorAngleOffset * settings.turningSpeed);
+		}
+		// Turn left
+		else if (weightLeft > weightRight) {
+			agent.angle += (settings.sensorAngleOffset * settings.turningSpeed);
+		}
+		else{
+			agent.angle += randomInRange(-0.1f, 0.1f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])); // 0.1 rad is about 5.73 degrees
+		}
 	}
 	else{
-		agent.angle += randomInRange(-0.2f, 0.2f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])); // 0.2 rad is about 11.45 degrees
+		agent.angle += randomInRange(0.0f, 6.282f, iTime * 0.01 * (agent.pos[0] + agent.pos[1]));
 	}
+
 
 	agent.pos[0] += agent.velocity * cos(agent.angle);
 	agent.pos[1] += agent.velocity * sin(agent.angle);
+	if (iBass > 0.5f){
+		float sign = sign(cos(iTime));
+		agent.pos[0] += sign * 0.5f;// * cos(randomInRange(0.0f, 6.282f, iBass));
+		agent.pos[1] += sign * 0.5f;// * sin(randomInRange(0.0f, 6.282f, iBass));
+	}
 
 	//Cyclical boundaries
 

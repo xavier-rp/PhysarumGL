@@ -17,11 +17,10 @@ void AudioStream::load(const sf::SoundBuffer& buffer)
 
 bool AudioStream::onGetData(Chunk& data)
 {
-    //std::cout << m_samples[m_currentSample] << std::endl;
+    //std::cout << "CALL" << std::endl;
     // number of samples to stream every time the function is called;
     // in a more robust implementation, it should be a fixed
     // amount of time rather than an arbitrary number of samples
-    const int samplesToStream = 256;
 
     // set the pointer to the next audio samples to be played
     data.samples = &m_samples[m_currentSample];
