@@ -2,9 +2,10 @@
 
 const unsigned int SCREEN_WIDTH = 1024;
 const unsigned int SCREEN_HEIGHT = 1024;
-const int numAgents = 100000;
+const int numAgents = 10000;
 
 const float PI = 3.1415926535f;
+const bool vSync = true;
 
 const float diffuseWeight = 0.2f;
 const float evaporationRate = 0.01f;
@@ -14,7 +15,7 @@ AgentSettings agentSettings =
 	22.5f * PI / 180.f,			//float sensorAngleOffset
 	10,							//int sensorOffsetDistance
 	1,							//int sensorWidth
-	0.2						//float turningSpeed
+	0.2							//float turningSpeed
 };
 
 // Vertices coordinates (first 3) and texture coordinates (last 2)

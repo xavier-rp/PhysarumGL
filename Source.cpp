@@ -13,8 +13,6 @@
 #include "AudioStream.h"
 #include "fftUtils.h"
 
-bool vSync = true;
-
 int main()
 {
 	// Initialize GLFW
@@ -88,6 +86,7 @@ int main()
 	GLuint resolutionUniformID = glGetUniformLocation(shaderProgram.ID, "iResolution");
 	GLuint numAgentsUniformID = glGetUniformLocation(shaderProgram.computeID, "numAgents");
 	GLuint highEnergyUniformID = glGetUniformLocation(shaderProgram.computeID, "highEnergy");
+	GLuint midEnergyUniformID = glGetUniformLocation(shaderProgram.computeID, "midEnergy");
 	GLuint bassEnergyuniformID = glGetUniformLocation(shaderProgram.computeID, "iBass");
 
 	GLuint diffuseWeightID = glGetUniformLocation(shaderProgram.computeID2, "diffuseWeight");
@@ -136,7 +135,7 @@ int main()
 	std::cout << numAgents / 128.0f << "  " << ceil(numAgents / 128.0f) << std::endl;
 
 	// load an audio buffer from a sound file
-	const sf::SoundBuffer buffer("audio/16mm.wav");
+	const sf::SoundBuffer buffer("audio/DE-TÜ - Koshi.wav");
 	std::cout << buffer.getSampleRate() << std::endl;
 	std::cout << buffer.getChannelCount() << std::endl;
 	AudioStream music;
@@ -146,9 +145,11 @@ int main()
 	std::vector<float> amplitudes;
 	//music.play();
 	double lastTriggerTime{ 1.0 }; // Non value zero to let time to the music object to fill its first fftBuffer
-	float maxBassEnergy = 0.0f;
+	float maxBassEnergy = 0.00000001f; // Avoid initial division by zero
 	float bassEnergy{ 0.0 };
-	float maxHighEnergy = 0.0f;
+	float maxMidEnergy = 0.00000001f;
+	float midEnergy{ 0.0 };
+	float maxHighEnergy = 0.00000001f;
 	float highEnergy{ 0.0 };
 	while (!glfwWindowShouldClose(window))
 	{
@@ -159,11 +160,13 @@ int main()
 			//std::cout << lastTriggerTime << std::endl;
 			amplitudes = computeFrequencyAmplitudes(music.fftBuffer);
 			bassEnergy = computeBassEnergy(amplitudes);
+			midEnergy = computeMidEnergy(amplitudes);
 			highEnergy = computeHighEnergy(amplitudes);
 			//std::cout << bassEnergy << "  " << maxBassEnergy << std::endl;
 			maxBassEnergy = (bassEnergy > maxBassEnergy) ? bassEnergy : maxBassEnergy;
+			maxMidEnergy = (midEnergy > maxMidEnergy) ? midEnergy : maxMidEnergy;
 			maxHighEnergy = (highEnergy > maxHighEnergy) ? highEnergy : maxHighEnergy;
-			std::cout << highEnergy << "  " << maxHighEnergy << std::endl;
+			//std::cout << highEnergy << "  " << maxHighEnergy << std::endl;
 			lastTriggerTime = glfwGetTime();
 		}
 		
@@ -175,6 +178,7 @@ int main()
 		glUniform1f(timeUniformComputeID, iTime);
 		glUniform1i(numAgentsUniformID, numAgents);
 		glUniform1f(highEnergyUniformID, highEnergy/maxHighEnergy);
+		glUniform1f(midEnergyUniformID, midEnergy / maxMidEnergy);
 		glUniform1f(bassEnergyuniformID, bassEnergy/maxBassEnergy);
 		glDispatchCompute(ceil(numAgents / 128.0f), 1, 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);

@@ -8,6 +8,7 @@ extern const unsigned int SCREEN_WIDTH;
 extern const unsigned int SCREEN_HEIGHT;
 extern const int numAgents;
 extern const float PI;
+extern const bool vSync;
 extern const float diffuseWeight;
 extern const float evaporationRate;
 

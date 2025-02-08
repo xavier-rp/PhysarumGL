@@ -95,8 +95,12 @@ void main()
 	blurredTrail = trail * (1 - diffuseWeight) + blurredTrail * diffuseWeight;
 	trailMap[trailMapIndex] = max(0.0f, blurredTrail-evaporationRate);	
 	
-	if (blurredTrail > 0.7f){
-		color = vec4(palette(blurredTrail + iBass/6), blurredTrail); //This way only the heads glow with the energy of the bass
+	if (blurredTrail > 0.75f){
+		//color = vec4(palette(blurredTrail), blurredTrail);
+		//color = vec4(palette(blurredTrail - iBass/6), blurredTrail); //This way only the heads glow with the energy of the bass
+		//color = vec4(vec3(1.0f - iBass), blurredTrail);
+		//color = vec4(vec3(iBass), blurredTrail);
+		color = vec4(vec3(0.0f), blurredTrail);
 	}
 	else if (blurredTrail > 0.0f){
 		color = vec4(palette(blurredTrail), blurredTrail);

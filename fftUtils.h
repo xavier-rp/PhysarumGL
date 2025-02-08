@@ -6,4 +6,6 @@ std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffe
 
 float computeBassEnergy(std::vector<float>& amplitudes);
 
+float computeMidEnergy(std::vector<float>& amplitudes);
+
 float computeHighEnergy(std::vector<float>& amplitudes);

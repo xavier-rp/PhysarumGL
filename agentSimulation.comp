@@ -4,6 +4,8 @@ uniform float iTime;
 uniform int numAgents;
 uniform float highEnergy;
 uniform float iBass;
+uniform float midEnergy;
+float dancingDirections[8] = float[](0.0f, 1.5709f, -1.0f, -1.5709f, 1.0472f, -1.0472f, 2.0944f, 3.6652f);
 
 struct Agent
 {
@@ -132,6 +134,31 @@ void drawSquareHeads(Agent agent, ivec2 dims, int headSize){
 		for (int offset_y = -headSize; offset_y <= headSize; offset_y++) {
 
 			pixelCoord = agentCoordOnGrid + ivec2(offset_x, offset_y);
+
+			if (pixelCoord.x < dims.x && pixelCoord.x >= 0 && pixelCoord.y < dims.y && pixelCoord.x >= 0) {
+
+				trailMapIndex = getIndex(pixelCoord.x, pixelCoord.y);
+				trailMap[trailMapIndex] = 1.0f;
+			}
+			
+		}		
+	}
+}
+
+
+void drawCircleHeads(Agent agent, ivec2 dims, int headSize){
+
+	ivec2 agentCoordOnGrid;
+	agentCoordOnGrid.x = int(agent.pos[0]);
+	agentCoordOnGrid.y = int(agent.pos[1]);
+	ivec2 pixelCoord;
+
+	uint trailMapIndex;
+
+	for (int offset_x = -headSize; offset_x <= headSize; offset_x++) {
+		for (int offset_y = -headSize; offset_y <= headSize; offset_y++) {
+
+			pixelCoord = agentCoordOnGrid + ivec2(offset_x, offset_y);
 				if (pixelCoord.x < dims.x && pixelCoord.x >= 0 && pixelCoord.y < dims.y && pixelCoord.x >= 0) {
 					trailMapIndex = getIndex(pixelCoord.x, pixelCoord.y);
 
@@ -139,7 +166,12 @@ void drawSquareHeads(Agent agent, ivec2 dims, int headSize){
 						trailMap[trailMapIndex] = 1.0f;
 					}
 					else {
-						trailMap[trailMapIndex] = 1.0f;
+						float trail = 1.0f - float(offset_x*offset_x + offset_y*offset_y)/float(headSize*headSize);
+						if (trail > 0.0f)
+						{
+							trailMap[trailMapIndex] = clamp(trail + trailMap[trailMapIndex], 0.0f, 1.0f);
+						}
+						
 
 				}
 			}
@@ -173,20 +205,41 @@ void updateAgentAndTrailMap(uint agentIndex){
 		else{
 			agent.angle += randomInRange(-0.1f, 0.1f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])); // 0.1 rad is about 5.73 degrees
 		}
+		agent.angle += highEnergy*randomInRange(-highEnergy, highEnergy, iTime * 0.01 * (agent.pos[0] + agent.pos[1])); //small perturbation
 	}
 	else{
 		agent.angle += randomInRange(0.0f, 6.282f, iTime * 0.01 * (agent.pos[0] + agent.pos[1]));
 	}
 
 
-	agent.pos[0] += agent.velocity * cos(agent.angle);
-	agent.pos[1] += agent.velocity * sin(agent.angle);
-	if (iBass > 0.5f){
-		float sign = sign(cos(iTime));
-		agent.pos[0] += sign * 0.5f;// * cos(randomInRange(0.0f, 6.282f, iBass));
-		agent.pos[1] += sign * 0.5f;// * sin(randomInRange(0.0f, 6.282f, iBass));
+	//agent.pos[0] += (agent.velocity + 0.5*iBass) * cos(agent.angle);
+	//agent.pos[1] += (agent.velocity + 0.5*iBass) * sin(agent.angle);
+	float energyTriplet = (1.0f/3.0f)*(iBass + midEnergy + highEnergy);
+	if (energyTriplet > 0.2f){
+		agent.pos[0] += (energyTriplet/2.0f + 0.2f) * cos(agent.angle);
+		agent.pos[1] += (energyTriplet/2.0f + 0.2f) * sin(agent.angle);
 	}
+	else{
+		//agent.pos[0] += highEnergy * cos(randomInRange(0.0f, 6.282f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])));
+		//agent.pos[1] += highEnergy * sin(randomInRange(0.0f, 6.282f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])));
+		agent.pos[0] += (energyTriplet + 0.1f)* cos(randomInRange(-3.1415f, 3.1415f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])));
+		agent.pos[1] += (energyTriplet + 0.1f)* sin(randomInRange(-3.1415f, 3.1415f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])));
+	}
+	
 
+
+	/*
+	if (iBass > 0.5f){
+		//float sign = sign(cos(iTime));
+		//agent.pos[0] += sign * 0.5f;// * cos(randomInRange(0.0f, 6.282f, iBass));
+		//agent.pos[1] += sign * 0.5f;// * sin(randomInRange(0.0f, 6.282f, iBass));
+		int directionIndex = int(8.0f*sin(iTime)*sin(iTime));//randomInRange(0.0f, 8.0f, iTime));
+		agent.pos[0] += cos(dancingDirections[directionIndex]);
+		agent.pos[1] += sin(dancingDirections[directionIndex]);
+
+	}
+	*/
+	
 	//Cyclical boundaries
 
 	if (agent.pos[0] > dims.x) {
@@ -204,8 +257,14 @@ void updateAgentAndTrailMap(uint agentIndex){
 	}	
 
 	agents[agentIndex] = agent;
-	
-	drawCrossHeads(agent, dims, 1);
+
+	if (iBass > 0.5f){
+		drawCircleHeads(agent, dims, int(5*iBass));
+	}
+	else{
+		drawCrossHeads(agent, dims, 1);
+	}	
+	//drawCrossHeads(agent, dims, 1);
 	//drawSquareHeads(agent, dims, 2);
 	//uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));
 	//trailMap[trailMapIndex] = 1.0f;

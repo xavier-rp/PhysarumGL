@@ -53,7 +53,18 @@ float computeBassEnergy(std::vector<float>& amplitudes)
 {
 	float energy{ 0.0 };
 
-	for (int i = 4; i < 50; i++) {
+	for (int i = 0; i < 23; i++) {
+		energy += amplitudes[i];
+	}
+
+	return energy;
+}
+
+float computeMidEnergy(std::vector<float>& amplitudes)
+{
+	float energy{ 0.0 };
+
+	for (int i = 23; i < 232; i++) {
 		energy += amplitudes[i];
 	}
 
@@ -64,7 +75,7 @@ float computeHighEnergy(std::vector<float>& amplitudes)
 {
 	float energy{ 0.0 };
 
-	for (int i = 460; i < amplitudes.size(); i++) {
+	for (int i = 232; i < amplitudes.size(); i++) {
 		energy += amplitudes[i];
 	}
 
