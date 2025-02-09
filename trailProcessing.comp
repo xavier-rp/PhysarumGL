@@ -36,7 +36,7 @@ uint getIndex(int x, int y) {
     return y * imageSize(screen).x + x;
 }
 
-float averageBlur3x3(ivec2 pixelCoords)
+float averageBlur3x3(ivec2 pixelCoords, ivec2 dims)
 {
 
 	float sum = 0;
@@ -46,7 +46,10 @@ float averageBlur3x3(ivec2 pixelCoords)
 		for (int offsetY = -1; offsetY <= 1; offsetY ++) {
 			int sampleX = pixelCoords.x + offsetX;
 			int sampleY = pixelCoords.y + offsetY;
-			sum += (trailMap[getIndex(sampleX,sampleY)]);
+
+			if (sampleX < dims.x && sampleX >= 0 && sampleY < dims.y && sampleY >= 0) {
+				sum += (trailMap[getIndex(sampleX,sampleY)]);
+			}
 
 			index++; // Move to the next element in the kernel array
 		}
@@ -57,7 +60,7 @@ float averageBlur3x3(ivec2 pixelCoords)
 	return sum;
 }
 
-float gaussianBlur3x3(ivec2 pixelCoords)
+float gaussianBlur3x3(ivec2 pixelCoords, ivec2 dims)
 {
 
 	float sum = 0;
@@ -69,7 +72,10 @@ float gaussianBlur3x3(ivec2 pixelCoords)
 			int sampleY = pixelCoords.y + offsetY;
 			float weight = kernel3x3[index] / 16.0;
 
-			sum += (trailMap[getIndex(sampleX,sampleY)] * weight);
+			if (sampleX < dims.x && sampleX >= 0 && sampleY < dims.y && sampleY >= 0) {
+
+				sum += (trailMap[getIndex(sampleX,sampleY)] * weight);
+			}
 
 			index++; // Move to the next element in the kernel array
 		}
@@ -84,30 +90,32 @@ void main()
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);	
 	ivec2 dims = imageSize(screen);
 
-    uint trailMapIndex = getIndex(pixelCoords.x, pixelCoords.y);
+	if (pixelCoords.x < dims.x && pixelCoords.x >= 0 && pixelCoords.y < dims.y && pixelCoords.x >= 0) {
+		uint trailMapIndex = getIndex(pixelCoords.x, pixelCoords.y);
 
-    float trail = trailMap[trailMapIndex];
+		float trail = trailMap[trailMapIndex];
 
-	vec4 color; 
-	vec3 maxColor;
+		vec4 color; 
+		vec3 maxColor;
 
-    float blurredTrail = gaussianBlur3x3(pixelCoords);
-	blurredTrail = trail * (1 - diffuseWeight) + blurredTrail * diffuseWeight;
-	trailMap[trailMapIndex] = max(0.0f, blurredTrail-evaporationRate);	
+		float blurredTrail = gaussianBlur3x3(pixelCoords, dims);
+		blurredTrail = trail * (1 - diffuseWeight) + blurredTrail * diffuseWeight;
+		trailMap[trailMapIndex] = max(0.0f, blurredTrail-evaporationRate);	
 	
-	if (blurredTrail > 0.75f){
-		//color = vec4(palette(blurredTrail), blurredTrail);
-		//color = vec4(palette(blurredTrail - iBass/6), blurredTrail); //This way only the heads glow with the energy of the bass
-		//color = vec4(vec3(1.0f - iBass), blurredTrail);
-		//color = vec4(vec3(iBass), blurredTrail);
-		color = vec4(vec3(0.0f), blurredTrail);
-	}
-	else if (blurredTrail > 0.0f){
-		color = vec4(palette(blurredTrail), blurredTrail);
-		//maxColor = vec3(palette(blurredTrail));
-		//color.rgb = color.rgb + iBass * (vec3(1.0) - color.rgb);
-	}
+		if (blurredTrail > 0.75f){
+			//color = vec4(palette(blurredTrail), blurredTrail);
+			//color = vec4(palette(blurredTrail - iBass/6), blurredTrail); //This way only the heads glow with the energy of the bass
+			//color = vec4(vec3(1.0f - iBass), blurredTrail);
+			//color = vec4(vec3(iBass), blurredTrail);
+			color = vec4(vec3(0.0f), blurredTrail);
+		}
+		else if (blurredTrail > 0.0f){
+			color = vec4(palette(blurredTrail), blurredTrail);
+			//maxColor = vec3(palette(blurredTrail));
+			//color.rgb = color.rgb + iBass * (vec3(1.0) - color.rgb);
+		}
 	
-    imageStore(screen, pixelCoords, color);
+		imageStore(screen, pixelCoords, color);
+	}
 
 }
