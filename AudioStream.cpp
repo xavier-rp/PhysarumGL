@@ -1,5 +1,9 @@
 #include "AudioStream.h"
 
+AudioStream::AudioStream(int samplesToStream) : samplesToStream{ samplesToStream }, fftBuffer(samplesToStream, 0) {
+
+
+}
 
 void AudioStream::load(const sf::SoundBuffer& buffer)
 {

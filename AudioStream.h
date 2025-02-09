@@ -9,7 +9,9 @@ public:
 	std::vector<std::int16_t> m_samples;
 	std::size_t               m_currentSample{};
 	std::vector<std::int16_t> fftBuffer;
-	const int samplesToStream = 8192;
+	int samplesToStream;
+
+	AudioStream(const int samplesToStream);
 
 	void load(const sf::SoundBuffer& buffer);
 

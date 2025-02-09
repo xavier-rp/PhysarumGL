@@ -11,6 +11,7 @@ extern const float PI;
 extern const bool vSync;
 extern const float diffuseWeight;
 extern const float evaporationRate;
+extern const int samplesToStream;
 
 extern GLfloat vertices[20];
 extern GLuint indices[6];

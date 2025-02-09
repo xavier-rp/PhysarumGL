@@ -2,6 +2,8 @@
 #include <fftw3.h>
 #include <iostream>
 
+#include "utils.h"
+
 std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffer) {
 	double* in1;
 	double* in2;
@@ -10,7 +12,7 @@ std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffe
 	fftw_plan p1;
 	fftw_plan p2;
 
-	in1 = (double*)fftw_malloc(sizeof(double) * fftBuffer.size()/2);
+	in1 = (double*)fftw_malloc(sizeof(double) * fftBuffer.size()/2); //The size is devided by 2, because the buffer stores the samples of channel 1 and 2
 	in2 = (double*)fftw_malloc(sizeof(double) * fftBuffer.size()/2);
 	out1 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * fftBuffer.size()/2);
 	out2 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * fftBuffer.size()/2);
@@ -51,9 +53,10 @@ std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffe
 
 float computeBassEnergy(std::vector<float>& amplitudes)
 {
+	int highestBassBin{ static_cast<int>(250.0f / (44100.0f / (static_cast<float>(samplesToStream) / 2.0f))) }; //Assumes a 44100 Hz sampling rate
 	float energy{ 0.0 };
 
-	for (int i = 0; i < 23; i++) {
+	for (int i = 0; i < highestBassBin; i++) {
 		energy += amplitudes[i];
 	}
 
@@ -62,9 +65,11 @@ float computeBassEnergy(std::vector<float>& amplitudes)
 
 float computeMidEnergy(std::vector<float>& amplitudes)
 {
+	int lowestMidBin{ static_cast<int>(250.0f / (44100.0f / (static_cast<float>(samplesToStream) / 2.0f))) };
+	int highestMidBin{ static_cast<int>(2500.0f / (44100.0f / (static_cast<float>(samplesToStream) / 2.0f))) };
 	float energy{ 0.0 };
 
-	for (int i = 23; i < 232; i++) {
+	for (int i = lowestMidBin; i < highestMidBin; i++) {
 		energy += amplitudes[i];
 	}
 
@@ -74,8 +79,8 @@ float computeMidEnergy(std::vector<float>& amplitudes)
 float computeHighEnergy(std::vector<float>& amplitudes)
 {
 	float energy{ 0.0 };
-
-	for (int i = 232; i < amplitudes.size(); i++) {
+	int lowestHighBin{ static_cast<int>(2500.0f / (44100.0f / (static_cast<float>(samplesToStream) / 2.0f))) };
+	for (int i = lowestHighBin; i < amplitudes.size(); i++) {
 		energy += amplitudes[i];
 	}
 

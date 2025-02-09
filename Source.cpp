@@ -138,13 +138,13 @@ int main()
 	const sf::SoundBuffer buffer("audio/DE-TÜ - Koshi.wav");
 	std::cout << buffer.getSampleRate() << std::endl;
 	std::cout << buffer.getChannelCount() << std::endl;
-	AudioStream music;
+	AudioStream music(samplesToStream);
 	music.load(buffer);
 	music.play();
 	//sf::Music music("audio/16mm.wav");
 	std::vector<float> amplitudes;
 	//music.play();
-	double lastTriggerTime{ 1.0 }; // Non value zero to let time to the music object to fill its first fftBuffer
+	double lastTriggerTime{ 0.0 };
 	float maxBassEnergy = 0.00000001f; // Avoid initial division by zero
 	float bassEnergy{ 0.0 };
 	float maxMidEnergy = 0.00000001f;
