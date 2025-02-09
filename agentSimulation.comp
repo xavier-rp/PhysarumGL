@@ -80,10 +80,6 @@ float sense(Agent agent, float angle){
 				uint trailMapIndex = getIndex(sampleX, sampleY);
 				sum += trailMap[trailMapIndex];
 			}
-			else{
-				sum += 0.0f;
-			}
-
 		}
 	}
 
@@ -264,6 +260,7 @@ void updateAgentAndTrailMap(uint agentIndex){
 	else{
 		drawCrossHeads(agent, dims, 1);
 	}	
+
 	//drawCrossHeads(agent, dims, 1);
 	//drawSquareHeads(agent, dims, 2);
 	//uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));
@@ -277,19 +274,7 @@ void main()
 	uint agentIndex = gl_GlobalInvocationID.x;
 	ivec2 dims = imageSize(screen);
 
-    if (agentIndex >= uint(numAgents)) {
-		// Shows the invocations that haven't done work on an agent
-		//vec4 color = vec4(1.0, 0.0, 1.0, 1.0);
-		//ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
-		//imageStore(screen, pixel_coords, color);
-    }
-	else{
-		// Shows the invocations that have done work on an agent
-		//vec4 color = vec4(1.0, 1.0, 0.0, 1.0);
-		//ivec2 pixel_coords = ivec2(mod(gl_GlobalInvocationID.x, dims.x), dims.y / 2 - 2 * (gl_GlobalInvocationID.x / dims.x));
-		//imageStore(screen, pixel_coords, color);
-
+    if (agentIndex < uint(numAgents)) {
 		updateAgentAndTrailMap(agentIndex);
-	
-	}
+    }
 }
