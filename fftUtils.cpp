@@ -4,6 +4,8 @@
 
 #include "utils.h"
 
+float binWidth = (44100.0f / (static_cast<float>(samplesToStream) / 2.0f));
+
 std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffer) {
 	double* in1;
 	double* in2;
@@ -53,7 +55,7 @@ std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffe
 
 float computeBassEnergy(std::vector<float>& amplitudes)
 {
-	int highestBassBin{ static_cast<int>(250.0f / (44100.0f / (static_cast<float>(samplesToStream) / 2.0f))) }; //Assumes a 44100 Hz sampling rate
+	int highestBassBin{ static_cast<int>(250.0f / binWidth) }; //Assumes a 44100 Hz sampling rate
 	float energy{ 0.0 };
 
 	for (int i = 0; i < highestBassBin; i++) {
@@ -65,8 +67,8 @@ float computeBassEnergy(std::vector<float>& amplitudes)
 
 float computeMidEnergy(std::vector<float>& amplitudes)
 {
-	int lowestMidBin{ static_cast<int>(250.0f / (44100.0f / (static_cast<float>(samplesToStream) / 2.0f))) };
-	int highestMidBin{ static_cast<int>(2500.0f / (44100.0f / (static_cast<float>(samplesToStream) / 2.0f))) };
+	int lowestMidBin{ static_cast<int>(250.0f / binWidth)};
+	int highestMidBin{ static_cast<int>(2500.0f / binWidth) };
 	float energy{ 0.0 };
 
 	for (int i = lowestMidBin; i < highestMidBin; i++) {
@@ -79,7 +81,7 @@ float computeMidEnergy(std::vector<float>& amplitudes)
 float computeHighEnergy(std::vector<float>& amplitudes)
 {
 	float energy{ 0.0 };
-	int lowestHighBin{ static_cast<int>(2500.0f / (44100.0f / (static_cast<float>(samplesToStream) / 2.0f))) };
+	int lowestHighBin{ static_cast<int>(2500.0f / binWidth) };
 	for (int i = lowestHighBin; i < amplitudes.size(); i++) {
 		energy += amplitudes[i];
 	}

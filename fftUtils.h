@@ -3,6 +3,7 @@
 #include <SFML/Audio.hpp>
 
 #include "utils.h"
+#include "utils.h"
 
 std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffer);
 
