@@ -3,7 +3,7 @@
 const unsigned int SCREEN_WIDTH = 1024;
 const unsigned int SCREEN_HEIGHT = 1024;
 const int numAgents = 10000;
-const int samplesToStream = 8192; // This is the total number of samples from channel 1 and 2 together (hence the fft is made on samplesToStream/2 samples for each channel)
+const int samplesToStream = 8192; // This is the total number of samples of channel 1 and 2 combined (hence the fft is made on samplesToStream/2 samples for each channel)
 
 const float PI = 3.1415926535f;
 const bool vSync = true;
