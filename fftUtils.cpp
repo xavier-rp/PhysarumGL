@@ -4,7 +4,7 @@
 
 #include "utils.h"
 
-float binWidth = (44100.0f / (static_cast<float>(samplesToStream) / 2.0f));
+float binWidth = (44100.0f / (static_cast<float>(samplesToStream) / 2.0f)); //Assumes a 44100 Hz sampling rate
 
 std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffer) {
 	double* in1;
@@ -21,8 +21,8 @@ std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffe
 
 	for (int i = 0; i < fftBuffer.size()/2; i++) {
 		
-		in1[i] = static_cast<double>(fftBuffer[2 * i])/32768.0f;
-		in2[i] = static_cast<double>(fftBuffer[2 * i + 1])/ 32768.0f;
+		in1[i] = static_cast<double>(fftBuffer[2 * i])/32768.0f; //Since the samples in a .wav file are 16 bit integers, the maximum possible value is 32768
+		in2[i] = static_cast<double>(fftBuffer[2 * i + 1])/ 32768.0f; //This division is like a normalization to observe coefficients amplitudes that are smaller
 		
 
 	}
@@ -39,6 +39,7 @@ std::vector<float> computeFrequencyAmplitudes(std::vector<std::int16_t> fftBuffe
 	for (int i = 0; i < fftBuffer.size() / 2; i++) {
 		double amplitude1{ sqrt(out1[i][0] * out1[i][0] + out1[i][1] * out1[i][1]) };
 		double amplitude2{ sqrt(out2[i][0] * out2[i][0] + out2[i][1] * out2[i][1]) };
+		// 1.0 / (fftBuffer.size() / 2) is the normalization factor of the DFT since FFTW does not normalize the DFT on its own
 		amplitudes.push_back(static_cast<float>((1.0 / (fftBuffer.size() / 2)) * (amplitude1 + amplitude2)));//amplitudes.push_back(static_cast<float>((1.0 / (fftBuffer.size() / 2)) * (amplitude1 + amplitude2)/2.0f));
 	}
 
