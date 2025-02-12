@@ -33,6 +33,7 @@ vec3 palette(float t)
 }
 
 uint getIndex(int x, int y) {
+	//Computes the index of a flattened array associated with the index (x, y) in 2D
     return y * imageSize(screen).x + x;
 }
 
@@ -90,6 +91,7 @@ void main()
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);	
 	ivec2 dims = imageSize(screen);
 
+	//Boundary Check. If the worker is outside, do nothing because we could see undefined behaviors.
 	if (pixelCoords.x < dims.x && pixelCoords.x >= 0 && pixelCoords.y < dims.y && pixelCoords.x >= 0) {
 		uint trailMapIndex = getIndex(pixelCoords.x, pixelCoords.y);
 
@@ -98,7 +100,10 @@ void main()
 		vec4 color; 
 		vec3 maxColor;
 
+		//The value of the trail at TrailMapIndex is a gaussian convolution with its neighbours.
 		float blurredTrail = gaussianBlur3x3(pixelCoords, dims);
+
+		//Compute the trail value depending on how much we want the trails to defuse (using the diffuseWeight uniform)
 		blurredTrail = trail * (1 - diffuseWeight) + blurredTrail * diffuseWeight;
 		trailMap[trailMapIndex] = max(0.0f, blurredTrail-evaporationRate);	
 	

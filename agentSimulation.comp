@@ -18,6 +18,7 @@ struct Agent
 layout (std430, binding = 1) buffer agentsBuffer{Agent agents[];};
 
 struct AgentSettings {
+	//Again, make sure this struct takes a memory space that is a multiple of 8 bytes
 	float sensorAngleOffset;
 	int sensorOffsetDistance;
 	int sensorWidth;
@@ -35,19 +36,8 @@ layout(std430, binding = 3) buffer TrailMapBuffer {
     float trailMap[];  // This is a 1D array representing the 2D matrix
 };
 
-// Hash function www.cs.ubc.ca/~rbridson/docs/schechter-sca08-turbulence.pdf
-uint hash(uint state)
-{
-    state ^= 2747636419u;
-    state *= 2654435769u;
-    state ^= state >> 16;
-    state *= 2654435769u;
-    state ^= state >> 16;
-    state *= 2654435769u;
-    return state;
-}
-
 float random(float seed) {
+	//pseudo-random number
     return fract(sin(seed) * 43758.5453);
 }
 
@@ -60,6 +50,7 @@ uint getIndex(int x, int y) {
 }
 
 float sense(Agent agent, float angle){
+	//Evaluate the amount of trail "pheromones" that the agent senses
 	ivec2 dims = imageSize(screen);
 	float sensorAngle = agent.angle + angle;
 	vec2 sensorDir = vec2(cos(sensorAngle), sin(sensorAngle));
@@ -199,11 +190,13 @@ void updateAgentAndTrailMap(uint agentIndex){
 			agent.angle += (settings.sensorAngleOffset * settings.turningSpeed);
 		}
 		else{
+			// If there is nothing in sight, wander around
 			agent.angle += randomInRange(-0.1f, 0.1f, iTime * 0.01 * (agent.pos[0] + agent.pos[1])); // 0.1 rad is about 5.73 degrees
 		}
 		agent.angle += highEnergy*randomInRange(-highEnergy, highEnergy, iTime * 0.01 * (agent.pos[0] + agent.pos[1])); //small perturbation
 	}
 	else{
+		//When the energy of the high frequencies is too high, pick a new direction randomly
 		agent.angle += randomInRange(0.0f, 6.282f, iTime * 0.01 * (agent.pos[0] + agent.pos[1]));
 	}
 

@@ -124,12 +124,16 @@ void main()
 	// Sample the color from the texture at the given texture coordinates
     vec4 texColor = texture(screen, texCoord);
 
+    //Allows for a smooth gradient between the color of the tails and the background color(black)
+    //The alpha channel is used to store the actual Trail value. Small values indicate that the trail at this position has evaporated a lot
+    //hence why it is related to the tails of the agents
     if (texColor.a < 0.10){
 
         texColor.rgb = mix(vec3(0.0f, 0.0f, 0.0f), texColor.rgb, smoothstep(0.0f, 1.0f, 10.0*texColor.a));
         
     }
 
+    //Activate to blur the image with a gaussian mask. See functions above for 3x3, 4x4, 5x5 and average blur
     //vec4 texColor = gaussianBlur3x3();//texture(screen, texCoord);
 
 	FragColor = texColor;

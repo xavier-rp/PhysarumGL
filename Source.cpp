@@ -78,7 +78,7 @@ int main()
 
 	shaderProgram.printMaxGroups();
 
-	// Gets ID of uniform called "iTime" and "iResolution"
+	// Initialize the uniforms for different shaders
 	GLuint timeUniformID = glGetUniformLocation(shaderProgram.ID, "iTime");
 	GLuint timeUniformComputeID = glGetUniformLocation(shaderProgram.computeID, "iTime");
 	GLuint timeUniformComputeID2 = glGetUniformLocation(shaderProgram.computeID2, "iTime");
@@ -100,6 +100,7 @@ int main()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, agentsBuffer);
 
 	// Allocate memory for the agents (numAgents * sizeof(Agent))
+	// Essentially, a Storage Buffer with GL_DYNAMIC_DRAW is a structure that will be updated very often and that is needed in the shader
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numAgents * sizeof(Agent), nullptr, GL_DYNAMIC_DRAW);
 
 	std::vector<Agent> agentsVector;
@@ -114,7 +115,7 @@ int main()
 	glGenBuffers(1, &trailMapBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, trailMapBuffer);
 	std::vector<float> trailMap(SCREEN_WIDTH* SCREEN_HEIGHT, 0.0f);
-	// Allocate memory for the agents (numAgents * sizeof(Agent))
+	// Allocate memory for the TrailMap Matrix ( trailMap.size() * sizeof(float))
 	glBufferData(GL_SHADER_STORAGE_BUFFER, trailMap.size() * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 	// Bind the buffer to binding point 3
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, trailMapBuffer);
@@ -123,7 +124,7 @@ int main()
 	GLuint agentSettingsBuffer;
 	glGenBuffers(1, &agentSettingsBuffer);
 	glBindBuffer(GL_UNIFORM_BUFFER, agentSettingsBuffer);
-	// Allocate memory for the agents (sizeof(Agent))
+	// Allocate memory for the Buffer containing the AgentSetting
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(AgentSettings), &agentSettings, GL_STATIC_DRAW);
 
 	// Bind the buffer to binding point 2
