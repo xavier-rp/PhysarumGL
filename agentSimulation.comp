@@ -261,6 +261,18 @@ void updateAgentAndTrailMap(uint agentIndex){
 		drawCrossHeads(agent, dims, 1);
 	}	
 
+
+	/*
+		if (iBass < 0.5f){
+		drawCircleHeads(agent, dims, 5 - int(5*iBass));
+		//drawCircleHeads(agent, dims, int(5*iBass));
+	}
+	else{
+		drawCrossHeads(agent, dims, 1);
+	}	
+	*/
+
+
 	//drawCrossHeads(agent, dims, 1);
 	//drawSquareHeads(agent, dims, 2);
 	//uint trailMapIndex = getIndex(int(agent.pos[0]), int(agent.pos[1]));

@@ -103,9 +103,9 @@ int main()
 	glBufferData(GL_SHADER_STORAGE_BUFFER, numAgents * sizeof(Agent), nullptr, GL_DYNAMIC_DRAW);
 
 	std::vector<Agent> agentsVector;
-	//agentsVector = spawnAgentsOnCircle(numAgents, 512.0f);
+	//agentsVector = spawnAgentsOnCircle(numAgents, 300.0f);
 	//agentsVector = spawnAgentsOnCircleRandom(numAgents, 350.0f);
-	agentsVector = spawnAgentsInsideCircleRandom(numAgents, 20.0f);
+	agentsVector = spawnAgentsInsideCircleRandom(numAgents, 100.0f);
 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, agentsVector.size() * sizeof(Agent), agentsVector.data());
 
@@ -138,12 +138,13 @@ int main()
 	const sf::SoundBuffer buffer("audio/DE-TÜ - Koshi.wav");
 	std::cout << buffer.getSampleRate() << std::endl;
 	std::cout << buffer.getChannelCount() << std::endl;
+
 	AudioStream music(samplesToStream);
 	music.load(buffer);
 	music.play();
-	//sf::Music music("audio/16mm.wav");
+
 	std::vector<float> amplitudes;
-	//music.play();
+
 	double lastTriggerTime{ 0.0 };
 	float maxBassEnergy = 0.00000001f; // Avoid initial division by zero
 	float bassEnergy{ 0.0 };
@@ -157,6 +158,9 @@ int main()
 		// Specify the color of the background
 		
 		if (glfwGetTime() - lastTriggerTime > 0.007f) {
+			maxBassEnergy = 0.99995f * maxBassEnergy;
+			maxMidEnergy = 0.99995f * maxMidEnergy;
+			maxHighEnergy = 0.99995f * maxHighEnergy;
 			//std::cout << lastTriggerTime << std::endl;
 			amplitudes = computeFrequencyAmplitudes(music.fftBuffer);
 			bassEnergy = computeBassEnergy(amplitudes);

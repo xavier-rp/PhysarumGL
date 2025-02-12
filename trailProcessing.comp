@@ -114,7 +114,7 @@ void main()
 			//maxColor = vec3(palette(blurredTrail));
 			//color.rgb = color.rgb + iBass * (vec3(1.0) - color.rgb);
 		}
-	
+		
 		imageStore(screen, pixelCoords, color);
 	}
 

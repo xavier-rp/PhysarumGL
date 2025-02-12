@@ -91,3 +91,17 @@ std::vector<Agent> spawnAgentsInsideCircleRandom(const int numAgents, float maxR
 
 	return agentsVector;
 }
+
+/*
+
+const float diffuseWeight = 0.9f;
+const float evaporationRate = 0.001f;
+
+AgentSettings agentSettings =
+{
+	22.5f * PI / 180.f,			//float sensorAngleOffset
+	20,							//int sensorOffsetDistance
+	1,							//int sensorWidth
+	0.15							//float turningSpeed
+};
+*/
